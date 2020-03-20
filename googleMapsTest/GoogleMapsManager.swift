@@ -27,18 +27,20 @@ class GoogleMapsData {
     // 軌跡所有頂點標誌的資訊
     static var trackMarkers = [GMSMarker]()
     
-    // 用來繪製多邊形的物件
+    // 用來描述多邊形的物件, 把要畫線的路徑存起來
     static var polygonPath = GMSMutablePath()
     
-    // 用來繪製軌跡的物件
+    // 用來描述軌跡的物件, 把要畫線的路徑存起來
     static var trackPath = GMSMutablePath()
     
     // 測試點
     static let testMarker = GMSMarker()
     
-    static var trackLine = GMSPolyline.init()
-    
+    // 繪製多邊形
     static var polygonLine = GMSPolyline.init()
+    
+    // 繪製軌跡
+    static var trackLine = GMSPolyline.init()
 }
 
 // MARK: - Class
