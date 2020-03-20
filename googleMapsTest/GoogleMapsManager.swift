@@ -51,6 +51,8 @@ class GoogleMapsManager {
 // MARK:- Public functions
 
 extension GoogleMapsManager {
+    
+    // 建立測試點
     func newTestPoint(coordinate: CLLocationCoordinate2D, mapView: GMSMapView) {
         GoogleMapsData.testMarker.position = coordinate
         GoogleMapsData.testMarker.isDraggable = false
@@ -85,6 +87,7 @@ extension GoogleMapsManager {
         drawPolygon(mapView: mapView)
     }
     
+    // 建立軌跡的每一個頂點
     func newPoints(coordinates: [CLLocationCoordinate2D], forTrack mapView: GMSMapView) {
         for (index, coordinate) in coordinates.enumerated() {
             let marker = GMSMarker()

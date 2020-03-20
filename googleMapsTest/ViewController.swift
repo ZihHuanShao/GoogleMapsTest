@@ -165,6 +165,7 @@ extension ViewController {
         googleMgr.newTestPoint(coordinate: cooridinate, mapView: mapView)
         testPointFlag = false
         
+        // 若測試點與頂點為同一點, 則算在多邊形內
         // 檢查該點是否又在多邊形內
         if googleMgr.checkIsInPolygon(coordinate: cooridinate) {
             showAlert(message: "是")
