@@ -111,8 +111,13 @@ class ViewController: UIViewController {
     }
     
     @IBAction func newTestPoint(_ sender: UIButton) {
-        googleMgr.removeTestPointMark()
-        testPointFlag = true
+//        googleMgr.removeTestPointMark()
+//        testPointFlag = true
+        
+        googleMgr.resetDrawingPolygon()
+        googleMgr.removePolygonMarks()
+        googleMgr.removePolygon()
+        
     }
     
     @IBAction func resetDrawingButtonPressed(_ sender: Any) {

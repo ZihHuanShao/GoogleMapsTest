@@ -41,6 +41,8 @@ class GoogleMapsData {
     
     // 繪製軌跡
     static var trackLine = GMSPolyline.init()
+    
+    static var redundantPolygonLines = [GMSPolyline]()
 }
 
 // MARK: - Class
@@ -143,17 +145,32 @@ extension GoogleMapsManager {
         GoogleMapsData.trackLine.map = nil
     }
     
+    func removePolygonMarks() {
+        for marker in GoogleMapsData.polygonMarkers {
+            marker.map = nil
+        }
+    }
+    
+    func removePolygon() {
+//        GoogleMapsData.polygonLine.map = nil
+        
+        for polygonLine in GoogleMapsData.redundantPolygonLines {
+            polygonLine.map = nil
+        }
+    }
+    
     func resetMap(mapView: GMSMapView) {
         mapView.clear()
         resetDrawingPolygon()
         resetDrawingTrack()
         setNumOfPolygon(num: 0)
+        GoogleMapsData.polygonPoints.removeAll()
+        GoogleMapsData.polygonMarkers.removeAll()
     }
     
     // 清除多邊形
     func resetDrawingPolygon() {
-        GoogleMapsData.polygonPoints.removeAll()
-        GoogleMapsData.polygonMarkers.removeAll()
+        
         
         GoogleMapsData.polygonPath.removeAllCoordinates()
     }
@@ -163,7 +180,7 @@ extension GoogleMapsManager {
     }
     
     
-    // 當移動多邊形某頂點時, 更新其位置
+    // 當已畫完多邊形時, 移動多邊形某頂點時, 更新其位置
     func modifyPoint(newMarker: GMSMarker, mapView: GMSMapView) {
         
         for (index, marker) in GoogleMapsData.polygonMarkers.enumerated() {
@@ -184,7 +201,7 @@ extension GoogleMapsManager {
         reDrawing(mapView: mapView)
     }
     
-    // 當移動多邊形某頂點時, 更新其位置
+    // 當未畫完多邊形時, 移動多邊形某頂點時, 更新其位置
     func modifyPoint(newMarker: GMSMarker, whenNotFinishDrawingYet mapView: GMSMapView) {
         
         for (index, marker) in GoogleMapsData.polygonMarkers.enumerated() {
@@ -232,14 +249,21 @@ extension GoogleMapsManager {
     }
     
     private func drawPolygon(mapView: GMSMapView) {
-        GoogleMapsData.polygonLine = GMSPolyline(path: GoogleMapsData.polygonPath)
-        GoogleMapsData.polygonLine.map = mapView
-        GoogleMapsData.polygonLine.strokeColor = .orange
-        GoogleMapsData.polygonLine.strokeWidth = 5
+        let polygonLine = GMSPolyline(path: GoogleMapsData.polygonPath)
+//        GoogleMapsData.polygonLine = GMSPolyline(path: GoogleMapsData.polygonPath)
+        polygonLine.map = mapView
+        polygonLine.strokeColor = .orange
+        polygonLine.strokeWidth = 5
+        
+        GoogleMapsData.redundantPolygonLines.append(polygonLine)
     }
     
     private func reDrawing(mapView: GMSMapView) {
         mapView.clear()
+        
+//        resetDrawingPolygon()
+//        removePolygonMarks()
+//        removePolygon()
         
         // 重新繪製
         for marker in GoogleMapsData.polygonMarkers {
@@ -250,6 +274,8 @@ extension GoogleMapsManager {
             m.snippet     = marker.snippet
             m.icon        = marker.icon
             m.map         = mapView
+            
+//            GoogleMapsData.polygonPath.add(marker.position)
         }
         
         drawPolygon(mapView: mapView)
