@@ -24,7 +24,7 @@ class GoogleMapsData {
     // 多邊形所有頂點標誌的資訊
     static var polygonMarkers = [GMSMarker]()
     
-    //
+    // 軌跡所有頂點標誌的資訊
     static var trackMarkers = [GMSMarker]()
     
     // 用來繪製多邊形的物件
@@ -35,6 +35,8 @@ class GoogleMapsData {
     
     // 測試點
     static let testMarker = GMSMarker()
+    
+    static var trackLine = GMSPolyline.init()
 }
 
 // MARK: - Class
@@ -94,6 +96,7 @@ extension GoogleMapsManager {
             marker.icon = UIImage(named: "walk-icon")
             marker.map = mapView
             
+            GoogleMapsData.trackMarkers.append(marker)
             GoogleMapsData.trackPath.add(coordinate)
         }
         drawTrack(mapView: mapView)
@@ -119,14 +122,25 @@ extension GoogleMapsManager {
         return (GoogleMapsData.count == 0) ? true : false
     }
     
-    func removeTestPoint() {
+    func removeTestPointMark() {
         GoogleMapsData.testMarker.map = nil
     }
+    
+    func removeTrackMarks() {
+        for marker in GoogleMapsData.trackMarkers {
+            marker.map = nil
+        }
+    }
 
+    func removeTrack() {
+        GoogleMapsData.trackLine.map = nil
+    }
+    
     func resetMap(mapView: GMSMapView) {
         mapView.clear()
         resetDrawingPolygon()
         resetDrawingTrack()
+        setNumOfPolygon(num: 0)
     }
     
     // 清除多邊形
@@ -135,7 +149,6 @@ extension GoogleMapsManager {
         GoogleMapsData.polygonMarkers.removeAll()
         
         GoogleMapsData.polygonPath.removeAllCoordinates()
-        GoogleMapsData.count = GoogleMapsData.NUM_OF_POLYGON
     }
     
     func resetDrawingTrack() {
@@ -205,10 +218,10 @@ extension GoogleMapsManager {
     }
     
     private func drawTrack(mapView: GMSMapView) {
-        let line = GMSPolyline(path: GoogleMapsData.trackPath)
-        line.map = mapView
-        line.strokeColor = .blue
-        line.strokeWidth = 5
+        GoogleMapsData.trackLine = GMSPolyline(path: GoogleMapsData.trackPath)
+        GoogleMapsData.trackLine.map = mapView
+        GoogleMapsData.trackLine.strokeColor = .blue
+        GoogleMapsData.trackLine.strokeWidth = 5
     }
     
     private func drawPolygon(mapView: GMSMapView) {

@@ -52,6 +52,8 @@ class ViewController: UIViewController {
     
     var isDrag: DragType!
     
+    var showTrackFlag = false
+    
     let googleMgr = GoogleMapsManager.shareInstance
     
     // MARK: - IBOutlet
@@ -109,26 +111,30 @@ class ViewController: UIViewController {
     }
     
     @IBAction func newTestPoint(_ sender: UIButton) {
-        googleMgr.removeTestPoint()
+        googleMgr.removeTestPointMark()
         testPointFlag = true
     }
     
     @IBAction func resetDrawingButtonPressed(_ sender: Any) {
-        googleMgr.setNumOfPolygon(num: 0)
         googleMgr.resetMap(mapView: mapView)
         preButtonPressed.backgroundColor = .orange
         testPointFlag = false
     }
     
     @IBAction func showTrackButtonPressed(_ sender: UIButton) {
-        
-        googleMgr.resetDrawingTrack()
-        
-        let locations = testTracks.map {
-            (location: Location) -> CLLocationCoordinate2D in
-            return CLLocationCoordinate2D(latitude: location.latitude!, longitude: location.longitude!)
+        if !showTrackFlag {
+            let locations = testTracks.map {
+                (location: Location) -> CLLocationCoordinate2D in
+                return CLLocationCoordinate2D(latitude: location.latitude!, longitude: location.longitude!)
+            }
+            googleMgr.newPoints(coordinates: locations, forTrack: mapView)
+            showTrackFlag = true
+        } else {
+            googleMgr.resetDrawingTrack()
+            googleMgr.removeTrackMarks()
+            googleMgr.removeTrack()
+            showTrackFlag = false
         }
-        googleMgr.newPoints(coordinates: locations, forTrack: mapView)
     }
 }
 
