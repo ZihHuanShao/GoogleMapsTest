@@ -37,6 +37,8 @@ class GoogleMapsData {
     static let testMarker = GMSMarker()
     
     static var trackLine = GMSPolyline.init()
+    
+    static var polygonLine = GMSPolyline.init()
 }
 
 // MARK: - Class
@@ -228,10 +230,10 @@ extension GoogleMapsManager {
     }
     
     private func drawPolygon(mapView: GMSMapView) {
-        let line = GMSPolyline(path: GoogleMapsData.polygonPath)
-        line.map = mapView
-        line.strokeColor = .orange
-        line.strokeWidth = 5
+        GoogleMapsData.polygonLine = GMSPolyline(path: GoogleMapsData.polygonPath)
+        GoogleMapsData.polygonLine.map = mapView
+        GoogleMapsData.polygonLine.strokeColor = .orange
+        GoogleMapsData.polygonLine.strokeWidth = 5
     }
     
     private func reDrawing(mapView: GMSMapView) {

@@ -119,10 +119,12 @@ class ViewController: UIViewController {
         googleMgr.resetMap(mapView: mapView)
         preButtonPressed.backgroundColor = .orange
         testPointFlag = false
+        showTrackFlag = false
     }
     
     @IBAction func showTrackButtonPressed(_ sender: UIButton) {
         if !showTrackFlag {
+            googleMgr.resetDrawingTrack()
             let locations = testTracks.map {
                 (location: Location) -> CLLocationCoordinate2D in
                 return CLLocationCoordinate2D(latitude: location.latitude!, longitude: location.longitude!)
@@ -130,7 +132,6 @@ class ViewController: UIViewController {
             googleMgr.newPoints(coordinates: locations, forTrack: mapView)
             showTrackFlag = true
         } else {
-            googleMgr.resetDrawingTrack()
             googleMgr.removeTrackMarks()
             googleMgr.removeTrack()
             showTrackFlag = false
@@ -255,6 +256,7 @@ extension ViewController: GMSMapViewDelegate {
         
         if googleMgr.checkFinishDrawing() {
             isDrag = .dragWithFinishDrawing
+            showTrackFlag = false
         } else {
             isDrag = .dragNotFinishDrawingYet
         }
