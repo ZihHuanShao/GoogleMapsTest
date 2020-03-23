@@ -220,12 +220,8 @@ extension ViewController: GMSMapViewDelegate {
     func mapView(_ mapView: GMSMapView, didBeginDragging marker: GMSMarker) {
         print("[didBeginDragging]: \(marker.position)")
         
-        // 多邊形已畫完
-        if googleMgr.checkFinishDrawing() {
-            
-        }
         // 多邊形未畫完, currentCooridinate一定有值, 再來判斷現在是拖曳哪個頂點, 然後在didDrag更新現在移動的位置
-        else {
+        if !googleMgr.checkFinishDrawing() {
             if let _currentCooridinate = currentCooridinate {
                 if (_currentCooridinate.latitude == marker.position.latitude &&
                     _currentCooridinate.longitude == marker.position.longitude) {
@@ -237,18 +233,22 @@ extension ViewController: GMSMapViewDelegate {
     
     // 拖曳中
     func mapView(_ mapView: GMSMapView, didDrag marker: GMSMarker) {
-        //print("[didDrag]: \(marker.position)")
+        print("[didDrag]: \(marker.position)")
         
+        googleMgr.modifyPoint(newMarker: marker, mapView: mapView)
+        
+        /*---
         // 多邊形已畫完
         if googleMgr.checkFinishDrawing() {
-            googleMgr.modifyPoint(newMarker: marker, mapView: mapView)
+         
         }
         // 多邊形未畫完
         else {
             if isDrag == .dragNotFinishDrawingYet || isDrag == .dragWithKeepDrawing {
-                googleMgr.modifyPoint(newMarker: marker, whenNotFinishDrawingYet: mapView)
+         
             }
         }
+        ---*/
     }
     
     // 結束拖曳
@@ -257,7 +257,7 @@ extension ViewController: GMSMapViewDelegate {
         
         if googleMgr.checkFinishDrawing() {
             isDrag = .dragWithFinishDrawing
-            showTrackFlag = false
+//            showTrackFlag = false
         } else {
             isDrag = .dragNotFinishDrawingYet
         }

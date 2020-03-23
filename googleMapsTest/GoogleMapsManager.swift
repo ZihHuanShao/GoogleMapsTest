@@ -13,7 +13,7 @@ import GoogleMaps
 
 class GoogleMapsData {
     // 幾邊形
-    static var NUM_OF_POLYGON = Int()
+    static var NUM_OF_POLYGON = Int() // should be set once
     
     // 計算多邊形已經建立幾個頂點了
     static var count = 0
@@ -47,6 +47,8 @@ class GoogleMapsData {
     
     // 存放所有頂點的標誌
     static var redundantPolygonMarkers = [GMSMarker]()
+    
+    static var polygonObject = GMSPolygon.init()
 }
 
 // MARK: - Class
@@ -90,7 +92,7 @@ extension GoogleMapsManager {
         
         GoogleMapsData.count -= 1
         
-        if GoogleMapsData.count == 0 {
+        if checkFinishDrawing() {
             GoogleMapsData.polygonPath.add(GoogleMapsData.polygonPoints[0])
             
         }
@@ -135,20 +137,24 @@ extension GoogleMapsManager {
         return (GoogleMapsData.count == 0) ? true : false
     }
     
+    // 移除測試點的標誌
     func removeTestPointMark() {
         GoogleMapsData.testMarker.map = nil
     }
     
+    // 移除軌跡的所有標誌
     func removeTrackMarks() {
         for marker in GoogleMapsData.trackMarkers {
             marker.map = nil
         }
     }
 
+    // 移除軌跡
     func removeTrack() {
         GoogleMapsData.trackLine.map = nil
     }
     
+    // 移除多邊形的所有標誌
     func removePolygonMarks() {
         for marker in GoogleMapsData.polygonMarkers {
             marker.map = nil
@@ -158,6 +164,7 @@ extension GoogleMapsManager {
         }
     }
     
+    // 移除多邊形
     func removePolygon() {
 //        GoogleMapsData.polygonLine.map = nil
         
@@ -173,10 +180,11 @@ extension GoogleMapsManager {
         setNumOfPolygon(num: 0)
     }
     
-    // 清除多邊形
     func resetDrawingPolygon() {
         GoogleMapsData.polygonPoints.removeAll()
         GoogleMapsData.polygonMarkers.removeAll()
+        GoogleMapsData.redundantPolygonMarkers.removeAll()
+        GoogleMapsData.redundantPolygonLines.removeAll()
         GoogleMapsData.polygonPath.removeAllCoordinates()
     }
     
@@ -184,7 +192,7 @@ extension GoogleMapsManager {
         GoogleMapsData.trackPath.removeAllCoordinates()
     }
     
-    
+    /*
     // 當已畫完多邊形時, 移動多邊形某頂點時, 更新其位置
     func modifyPoint(newMarker: GMSMarker, mapView: GMSMapView) {
         
@@ -218,6 +226,30 @@ extension GoogleMapsManager {
         }
         reDrawing(mapView: mapView)
     }
+    */
+    
+    // 移動多邊形某頂點時, 更新其位置
+    func modifyPoint(newMarker: GMSMarker, mapView: GMSMapView) {
+        for (index, marker) in GoogleMapsData.polygonMarkers.enumerated() {
+            if marker.title == newMarker.title {
+                GoogleMapsData.polygonMarkers[index].position = newMarker.position
+                GoogleMapsData.polygonPoints[index] = newMarker.position
+                GoogleMapsData.polygonPath.replaceCoordinate(at: UInt(index), with: newMarker.position)
+            }
+            
+            // 多邊形已畫完
+            if checkFinishDrawing() {
+                // 原點(第一個點)鍵值
+                let originalPoint = "Point" + "\(GoogleMapsData.NUM_OF_POLYGON)"
+                
+                // 如果現在移動的是原點, 把路徑的最後一個點重設為原點
+                if newMarker.title == originalPoint {
+                    GoogleMapsData.polygonPath.replaceCoordinate(at: UInt(GoogleMapsData.NUM_OF_POLYGON), with: GoogleMapsData.polygonPoints[0])
+                }
+            }
+        }
+        reDrawing(mapView: mapView)
+    }
 }
 
 // MARK:- Private functions
@@ -244,6 +276,7 @@ extension GoogleMapsManager {
         return p.contains(test)
     }
     
+    // 繪製軌跡
     private func drawTrack(mapView: GMSMapView) {
         GoogleMapsData.trackLine = GMSPolyline(path: GoogleMapsData.trackPath)
         GoogleMapsData.trackLine.map = mapView
@@ -251,50 +284,57 @@ extension GoogleMapsManager {
         GoogleMapsData.trackLine.strokeWidth = 5
     }
     
+    // 繪製多邊形
     private func drawPolygon(mapView: GMSMapView) {
         let polygonLine = GMSPolyline(path: GoogleMapsData.polygonPath)
-//        GoogleMapsData.polygonLine = GMSPolyline(path: GoogleMapsData.polygonPath)
         polygonLine.map = mapView
         polygonLine.strokeColor = .orange
         polygonLine.strokeWidth = 5
         
         GoogleMapsData.redundantPolygonLines.append(polygonLine)
+        
+        if checkFinishDrawing() {
+            fillPolygonColor(mapView: mapView)
+        }
+    }
+    
+    // 將多邊形內部填滿顏色
+    private func fillPolygonColor(mapView: GMSMapView) {
+        GoogleMapsData.polygonObject = GMSPolygon()
+        GoogleMapsData.polygonObject.path = GoogleMapsData.polygonPath
+        GoogleMapsData.polygonObject.fillColor = UIColor(displayP3Red: 1, green: 1, blue: 0, alpha: 0.2)
+        GoogleMapsData.polygonObject.map = mapView
     }
     
     private func reDrawing(mapView: GMSMapView) {
-//        mapView.clear()
 
+        // 清除目前地圖上多邊形的標誌
         removePolygonMarks()
-        removePolygon()
-//        resetDrawingPolygon()
-
         
-        // 重新繪製
-        var firstMarker = GMSMarker.init()
-        for (index, marker) in GoogleMapsData.polygonMarkers.enumerated() {
+        // 清除目前地圖上的多邊形
+        removePolygon()
+        
+        // 清除目前地圖上有畫顏色的地方
+        GoogleMapsData.polygonObject.map = nil
+        
+        GoogleMapsData.redundantPolygonMarkers.removeAll()
+        
+        GoogleMapsData.redundantPolygonLines.removeAll()
+        
+        
+        // 重新繪製多邊形標誌
+
+        for marker in GoogleMapsData.polygonMarkers {
            
-            let m = GMSMarker()
+            let m = GMSMarker.init()
             m.position    = marker.position
             m.isDraggable = marker.isDraggable
             m.title       = marker.title
             m.snippet     = marker.snippet
             m.icon        = marker.icon
             m.map         = mapView
-            
-            if index == 0 {
-                firstMarker = m
-            }
-            
+
             GoogleMapsData.redundantPolygonMarkers.append(m)
-            
-            // 原點(第一個點)鍵值
-            let originalPoint = "Point" + "\(GoogleMapsData.NUM_OF_POLYGON)"
-            
-            // 如果現在移動的是原點, 把路徑的最後一個點重設為原點
-            if m.title == originalPoint {
-                GoogleMapsData.redundantPolygonMarkers.append(firstMarker)
-            }
-//            GoogleMapsData.polygonPath.add(marker.position)
             
         }
         
