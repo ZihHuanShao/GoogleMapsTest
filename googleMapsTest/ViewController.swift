@@ -88,6 +88,7 @@ class ViewController: UIViewController {
     @IBAction func selectNumOfPolygonButtonPressed(_ sender: UIButton) {
         
         resetDrawingButtonPressed(UIButton())
+
         
         switch sender.tag {
         case 3:
@@ -111,13 +112,8 @@ class ViewController: UIViewController {
     }
     
     @IBAction func newTestPoint(_ sender: UIButton) {
-//        googleMgr.removeTestPointMark()
-//        testPointFlag = true
-        
-        googleMgr.resetDrawingPolygon()
-        googleMgr.removePolygonMarks()
-        googleMgr.removePolygon()
-        
+        googleMgr.removeTestPointMark()
+        testPointFlag = true
     }
     
     @IBAction func resetDrawingButtonPressed(_ sender: Any) {

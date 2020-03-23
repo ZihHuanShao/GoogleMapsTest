@@ -42,7 +42,11 @@ class GoogleMapsData {
     // 繪製軌跡
     static var trackLine = GMSPolyline.init()
     
+    // 存放所有頂點之間的每一筆線條
     static var redundantPolygonLines = [GMSPolyline]()
+    
+    // 存放所有頂點的標誌
+    static var redundantPolygonMarkers = [GMSMarker]()
 }
 
 // MARK: - Class
@@ -149,6 +153,9 @@ extension GoogleMapsManager {
         for marker in GoogleMapsData.polygonMarkers {
             marker.map = nil
         }
+        for marker in GoogleMapsData.redundantPolygonMarkers {
+            marker.map = nil
+        }
     }
     
     func removePolygon() {
@@ -164,14 +171,12 @@ extension GoogleMapsManager {
         resetDrawingPolygon()
         resetDrawingTrack()
         setNumOfPolygon(num: 0)
-        GoogleMapsData.polygonPoints.removeAll()
-        GoogleMapsData.polygonMarkers.removeAll()
     }
     
     // 清除多邊形
     func resetDrawingPolygon() {
-        
-        
+        GoogleMapsData.polygonPoints.removeAll()
+        GoogleMapsData.polygonMarkers.removeAll()
         GoogleMapsData.polygonPath.removeAllCoordinates()
     }
     
@@ -209,8 +214,6 @@ extension GoogleMapsManager {
                 GoogleMapsData.polygonMarkers[index].position = newMarker.position
                 GoogleMapsData.polygonPoints[index] = newMarker.position
                 GoogleMapsData.polygonPath.replaceCoordinate(at: UInt(index), with: newMarker.position)
-                
-                
             }
         }
         reDrawing(mapView: mapView)
@@ -259,14 +262,17 @@ extension GoogleMapsManager {
     }
     
     private func reDrawing(mapView: GMSMapView) {
-        mapView.clear()
-        
+//        mapView.clear()
+
+        removePolygonMarks()
+        removePolygon()
 //        resetDrawingPolygon()
-//        removePolygonMarks()
-//        removePolygon()
+
         
         // 重新繪製
-        for marker in GoogleMapsData.polygonMarkers {
+        var firstMarker = GMSMarker.init()
+        for (index, marker) in GoogleMapsData.polygonMarkers.enumerated() {
+           
             let m = GMSMarker()
             m.position    = marker.position
             m.isDraggable = marker.isDraggable
@@ -275,7 +281,21 @@ extension GoogleMapsManager {
             m.icon        = marker.icon
             m.map         = mapView
             
+            if index == 0 {
+                firstMarker = m
+            }
+            
+            GoogleMapsData.redundantPolygonMarkers.append(m)
+            
+            // 原點(第一個點)鍵值
+            let originalPoint = "Point" + "\(GoogleMapsData.NUM_OF_POLYGON)"
+            
+            // 如果現在移動的是原點, 把路徑的最後一個點重設為原點
+            if m.title == originalPoint {
+                GoogleMapsData.redundantPolygonMarkers.append(firstMarker)
+            }
 //            GoogleMapsData.polygonPath.add(marker.position)
+            
         }
         
         drawPolygon(mapView: mapView)
