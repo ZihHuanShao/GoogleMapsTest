@@ -257,7 +257,6 @@ extension ViewController: GMSMapViewDelegate {
         
         if googleMgr.checkFinishDrawing() {
             isDrag = .dragWithFinishDrawing
-//            showTrackFlag = false
         } else {
             isDrag = .dragNotFinishDrawingYet
         }
@@ -302,15 +301,6 @@ extension ViewController: CLLocationManagerDelegate {
             let lng = location.coordinate.longitude
             let myPos = GMSCameraPosition.camera(withLatitude: lat, longitude: lng, zoom: 15)
             mapView.animate(to: myPos)
-            
-//            let newLat = lat + 0.5
-//            let marker = GMSMarker()
-//            
-//            marker.position = CLLocationCoordinate2D(latitude: newLat, longitude: lng)
-//            marker.isDraggable = true
-//            marker.title = "TEST"
-//            marker.snippet = ""
-//            marker.map = mapView
 
             // 避免自己位置一有變動, 畫面就強制移到定位點
             myLocationMgr.stopUpdatingLocation()

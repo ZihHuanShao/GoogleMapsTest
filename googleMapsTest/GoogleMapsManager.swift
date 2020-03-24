@@ -21,10 +21,13 @@ class GoogleMapsData {
     // 多邊形所有頂點座標
     static var polygonPoints = [CLLocationCoordinate2D]()
     
-    // 多邊形所有頂點標誌的資訊
+    // 存放多邊形所有頂點標誌
     static var polygonMarkers = [GMSMarker]()
     
-    // 軌跡所有頂點標誌的資訊
+    // 存放每次更新過(移動過)的多邊形所有頂點標誌
+    static var updatedPolygonMarkers = [GMSMarker]()
+    
+    // 軌跡所有頂點標誌
     static var trackMarkers = [GMSMarker]()
     
     // 用來描述多邊形的物件, 把要畫線的路徑存起來
@@ -36,18 +39,13 @@ class GoogleMapsData {
     // 測試點
     static let testMarker = GMSMarker()
     
-    // 繪製多邊形
-    static var polygonLine = GMSPolyline.init()
-    
     // 繪製軌跡
     static var trackLine = GMSPolyline.init()
     
-    // 存放所有頂點之間的每一筆線條
-    static var redundantPolygonLines = [GMSPolyline]()
+    // 繪製多邊形的線條
+    static var polygonLines = [GMSPolyline]()
     
-    // 存放所有頂點的標誌
-    static var redundantPolygonMarkers = [GMSMarker]()
-    
+    // 繪製多邊形裡面的顏色
     static var polygonObject = GMSPolygon.init()
 }
 
@@ -159,18 +157,21 @@ extension GoogleMapsManager {
         for marker in GoogleMapsData.polygonMarkers {
             marker.map = nil
         }
-        for marker in GoogleMapsData.redundantPolygonMarkers {
+        for marker in GoogleMapsData.updatedPolygonMarkers {
             marker.map = nil
         }
     }
     
     // 移除多邊形
     func removePolygon() {
-//        GoogleMapsData.polygonLine.map = nil
         
-        for polygonLine in GoogleMapsData.redundantPolygonLines {
+        for polygonLine in GoogleMapsData.polygonLines {
             polygonLine.map = nil
         }
+    }
+    
+    func removePolygonColor() {
+        GoogleMapsData.polygonObject.map = nil
     }
     
     func resetMap(mapView: GMSMapView) {
@@ -183,8 +184,8 @@ extension GoogleMapsManager {
     func resetDrawingPolygon() {
         GoogleMapsData.polygonPoints.removeAll()
         GoogleMapsData.polygonMarkers.removeAll()
-        GoogleMapsData.redundantPolygonMarkers.removeAll()
-        GoogleMapsData.redundantPolygonLines.removeAll()
+        GoogleMapsData.updatedPolygonMarkers.removeAll()
+        GoogleMapsData.polygonLines.removeAll()
         GoogleMapsData.polygonPath.removeAllCoordinates()
     }
     
@@ -291,7 +292,7 @@ extension GoogleMapsManager {
         polygonLine.strokeColor = .orange
         polygonLine.strokeWidth = 5
         
-        GoogleMapsData.redundantPolygonLines.append(polygonLine)
+        GoogleMapsData.polygonLines.append(polygonLine)
         
         if checkFinishDrawing() {
             fillPolygonColor(mapView: mapView)
@@ -308,24 +309,20 @@ extension GoogleMapsManager {
     
     private func reDrawing(mapView: GMSMapView) {
 
-        // 清除目前地圖上多邊形的標誌
-        removePolygonMarks()
+        // 每次在重畫地圖時, 都要先移除前一個畫面所用到的畫面資訊:
+        // 1. 清除目前地圖上的圖示
+        removePolygonMarks() // 多邊形的標誌
+        removePolygon()      //多邊形
+        removePolygonColor() // 多邊形裡面的顏色
         
-        // 清除目前地圖上的多邊形
-        removePolygon()
-        
-        // 清除目前地圖上有畫顏色的地方
-        GoogleMapsData.polygonObject.map = nil
-        
-        GoogleMapsData.redundantPolygonMarkers.removeAll()
-        
-        GoogleMapsData.redundantPolygonLines.removeAll()
+        // 2.清空在繪製地圖時用到的陣列
+        GoogleMapsData.updatedPolygonMarkers.removeAll()
+        GoogleMapsData.polygonLines.removeAll()
         
         
         // 重新繪製多邊形標誌
-
         for marker in GoogleMapsData.polygonMarkers {
-           
+            
             let m = GMSMarker.init()
             m.position    = marker.position
             m.isDraggable = marker.isDraggable
@@ -334,10 +331,8 @@ extension GoogleMapsManager {
             m.icon        = marker.icon
             m.map         = mapView
 
-            GoogleMapsData.redundantPolygonMarkers.append(m)
-            
+            GoogleMapsData.updatedPolygonMarkers.append(m)
         }
-        
         drawPolygon(mapView: mapView)
     }
 }
