@@ -111,6 +111,7 @@ class ViewController: UIViewController {
         preButtonPressed = sender
     }
     
+    
     @IBAction func drawButtonPressed(_ sender: UIButton) {
         resetDrawingButtonPressed(UIButton())
         
@@ -118,6 +119,10 @@ class ViewController: UIViewController {
         
         sender.backgroundColor = .red
         preButtonPressed = sender
+    }
+    
+    @IBAction func drawBackButtonPressed(_ sender: UIButton) {
+        googleMgr.deletePreviousPonint(mapView: mapView)
     }
     
     @IBAction func finishDrawingButtonPressed(_ sender: UIButton) {

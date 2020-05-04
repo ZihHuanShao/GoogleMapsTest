@@ -81,8 +81,23 @@
                                     <action selector="drawButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="V3i-CX-kWs"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" alpha="0.80000001192092896" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gjB-C0-nsk">
+                            <button opaque="NO" alpha="0.80000001192092896" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="126-ZJ-bbF">
                                 <rect key="frame" x="70" y="64" width="30" height="30"/>
+                                <color key="backgroundColor" red="1" green="0.57637232540000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="30" id="2oB-Zb-x6z"/>
+                                    <constraint firstAttribute="height" constant="30" id="63b-Kc-odd"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                <state key="normal" title="⇠">
+                                    <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                </state>
+                                <connections>
+                                    <action selector="drawBackButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wHY-g5-y8G"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" alpha="0.80000001192092896" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="gjB-C0-nsk">
+                                <rect key="frame" x="120" y="64" width="30" height="30"/>
                                 <color key="backgroundColor" red="1" green="0.57637232540000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="30" id="82E-5Y-ajb"/>
@@ -110,9 +125,11 @@
                             <constraint firstItem="1kA-nf-tmt" firstAttribute="centerX" secondItem="fPH-wH-o4O" secondAttribute="centerX" id="Qkm-b5-RHV"/>
                             <constraint firstItem="GoH-No-95t" firstAttribute="centerY" secondItem="fPH-wH-o4O" secondAttribute="centerY" id="SAK-q6-of2"/>
                             <constraint firstItem="kut-OJ-ykp" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="W0t-3e-m4S"/>
+                            <constraint firstItem="gjB-C0-nsk" firstAttribute="leading" secondItem="126-ZJ-bbF" secondAttribute="trailing" constant="20" id="ZoC-4U-sKg"/>
                             <constraint firstItem="1kA-nf-tmt" firstAttribute="top" secondItem="fPH-wH-o4O" secondAttribute="bottom" constant="20" id="fh4-92-B5C"/>
                             <constraint firstItem="gjB-C0-nsk" firstAttribute="centerY" secondItem="fPH-wH-o4O" secondAttribute="centerY" id="fpU-ip-eNE"/>
-                            <constraint firstItem="gjB-C0-nsk" firstAttribute="leading" secondItem="GoH-No-95t" secondAttribute="trailing" constant="20" id="qBS-I3-bbw"/>
+                            <constraint firstItem="126-ZJ-bbF" firstAttribute="centerY" secondItem="GoH-No-95t" secondAttribute="centerY" id="iHG-Zk-ska"/>
+                            <constraint firstItem="126-ZJ-bbF" firstAttribute="leading" secondItem="GoH-No-95t" secondAttribute="trailing" constant="20" id="nVw-vF-9i8"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
