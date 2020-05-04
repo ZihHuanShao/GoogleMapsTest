@@ -33,7 +33,7 @@ class GoogleMapsData {
     // 用來描述多邊形的物件, 把要畫線的路徑存起來
     static var polygonPath = GMSMutablePath()
     
-    // 用來描述軌跡的物件, 把要畫線的路徑存起來
+    // 用來描述軌跡的物件, 把要畫多邊形的路徑線條存起來
     static var trackPath = GMSMutablePath()
     
     // 測試點
@@ -78,7 +78,7 @@ extension GoogleMapsManager {
         
         marker.position = coordinate
         marker.isDraggable = true
-        marker.title = "Point" + "\(GoogleMapsData.count)" // 以 Point1/ Point2/ ... 為鍵值
+        marker.title = "Point" + "\(GoogleMapsData.count)" // 以 Point3/ Point2/ ... 為鍵值
         marker.snippet = (GoogleMapsData.count == GoogleMapsData.NUM_OF_POLYGON) ? "Original Point" : ""
         marker.icon = UIImage(named: "warning-icon")
         marker.map = mapView
@@ -88,8 +88,10 @@ extension GoogleMapsManager {
         
         GoogleMapsData.polygonPath.add(coordinate)
         
+        // EX: 如果是畫四邊形, GoogleMapsData.count初值為4, 每畫一個點就減1, 當為0時表示已畫完
         GoogleMapsData.count -= 1
         
+        // EX: 如果是畫四邊形, 當畫完4個點, 會再將原點設為第5個頂點, 如此才可將四邊形繪製出來 (因為畫四邊形需要有五個點, 以此類推)
         if checkFinishDrawing() {
             GoogleMapsData.polygonPath.add(GoogleMapsData.polygonPoints[0])
             
@@ -232,6 +234,7 @@ extension GoogleMapsManager {
     // 移動多邊形某頂點時, 更新其位置
     func modifyPoint(newMarker: GMSMarker, mapView: GMSMapView) {
         for (index, marker) in GoogleMapsData.polygonMarkers.enumerated() {
+            // 找到現在要拖曳的點, 目前是以title為鍵值
             if marker.title == newMarker.title {
                 GoogleMapsData.polygonMarkers[index].position = newMarker.position
                 GoogleMapsData.polygonPoints[index] = newMarker.position
@@ -243,7 +246,7 @@ extension GoogleMapsManager {
                 // 原點(第一個點)鍵值
                 let originalPoint = "Point" + "\(GoogleMapsData.NUM_OF_POLYGON)"
                 
-                // 如果現在移動的是原點, 把路徑的最後一個點重設為原點
+                // 如果現在移動的是原點, 也一併把路徑的最後一個點重設為原點, 因為要把最後一個頂點連接原點的線畫出來
                 if newMarker.title == originalPoint {
                     GoogleMapsData.polygonPath.replaceCoordinate(at: UInt(GoogleMapsData.NUM_OF_POLYGON), with: GoogleMapsData.polygonPoints[0])
                 }
@@ -289,8 +292,8 @@ extension GoogleMapsManager {
     private func drawPolygon(mapView: GMSMapView) {
         let polygonLine = GMSPolyline(path: GoogleMapsData.polygonPath)
         polygonLine.map = mapView
-        polygonLine.strokeColor = .orange
-        polygonLine.strokeWidth = 5
+        polygonLine.strokeColor = .orange // 線條顏色
+        polygonLine.strokeWidth = 5 // 線條粗細
         
         GoogleMapsData.polygonLines.append(polygonLine)
         
@@ -303,7 +306,7 @@ extension GoogleMapsManager {
     private func fillPolygonColor(mapView: GMSMapView) {
         GoogleMapsData.polygonObject = GMSPolygon()
         GoogleMapsData.polygonObject.path = GoogleMapsData.polygonPath
-        GoogleMapsData.polygonObject.fillColor = UIColor(displayP3Red: 1, green: 1, blue: 0, alpha: 0.2)
+        GoogleMapsData.polygonObject.fillColor = UIColor(displayP3Red: 1, green: 1, blue: 0, alpha: 0.2) // 多邊形區塊顏色
         GoogleMapsData.polygonObject.map = mapView
     }
     

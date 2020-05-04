@@ -146,8 +146,23 @@ extension ViewController {
     private func updateDataSource() {
         myLocationMgr = CLLocationManager()
         myLocationMgr.delegate = self
+        
+        // 使用者移動多少距離後會更新座標點(單位為米)
         myLocationMgr.distanceFilter = kCLLocationAccuracyBestForNavigation
+        
+        // 定位的精確度
         myLocationMgr.desiredAccuracy = kCLLocationAccuracyBestForNavigation
+        
+        /*
+        // Ref: https://reurl.cc/qdVQzg
+        // CLLocationDistance Type
+        kCLLocationAccuracyBestForNavigation: 精確度最高，適用於導航的定位
+        kCLLocationAccuracyBest: 精確度高
+        kCLLocationAccuracyNearestTenMeters: 精確度 10 公尺以內
+        kCLLocationAccuracyHundredMeters: 精確度 100 公尺以內
+        kCLLocationAccuracyKilometer: 精確度 1 公里以內
+        kCLLocationAccuracyThreeKilometers: 精確度 3 公里以內
+        */
         
         mapView.delegate = self
     }
@@ -281,9 +296,9 @@ extension ViewController: CLLocationManagerDelegate {
             self.present(alertController, animated: true, completion: nil)
         
         case .authorizedWhenInUse:
-            myLocationMgr.startUpdatingLocation()
-            mapView.isMyLocationEnabled = true
-            mapView.settings.myLocationButton = true
+            myLocationMgr.startUpdatingLocation() // 將畫面移動到目前使用者的位置
+            mapView.isMyLocationEnabled = true  // 開啟我的位置(小藍點)
+            mapView.settings.myLocationButton = true // 開啟定位按鈕(右下角的圓點)
             
         default:
             break
@@ -292,13 +307,15 @@ extension ViewController: CLLocationManagerDelegate {
     
     // 所在位置只要有更動就會觸發
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        // 印出目前所在位置座標
-        let currentLocation: CLLocation = locations[0] as CLLocation
-        print("[Current Location]: \(currentLocation.coordinate.latitude), \(currentLocation.coordinate.longitude)")
         
         if let location = locations.first {
             let lat = location.coordinate.latitude
             let lng = location.coordinate.longitude
+            
+            // 印出目前所在位置座標
+            print("[Current Location]: \(location.coordinate.latitude), \(location.coordinate.longitude)")
+            
+            // 將視角切換至使用者當前的位置
             let myPos = GMSCameraPosition.camera(withLatitude: lat, longitude: lng, zoom: 15)
             mapView.animate(to: myPos)
 
