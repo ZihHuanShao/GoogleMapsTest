@@ -111,6 +111,20 @@ class ViewController: UIViewController {
         preButtonPressed = sender
     }
     
+    @IBAction func drawButtonPressed(_ sender: UIButton) {
+        resetDrawingButtonPressed(UIButton())
+        
+        googleMgr.startAddingVertex()
+        
+        sender.backgroundColor = .red
+        preButtonPressed = sender
+    }
+    
+    @IBAction func finishDrawingButtonPressed(_ sender: UIButton) {
+        googleMgr.finishAddingVertex(mapView: mapView)
+        
+    }
+    
     @IBAction func newTestPoint(_ sender: UIButton) {
         googleMgr.removeTestPointMark()
         testPointFlag = true
