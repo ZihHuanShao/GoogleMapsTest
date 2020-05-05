@@ -26,6 +26,13 @@ class ViewController: UIViewController {
     
     // MAEK: - Properties
     
+    var testPolygon = [
+        Location(latitude: 24.16793112650773, longitude: 120.66189229488373),
+        Location(latitude: 24.162774040111515, longitude: 120.66071547567844),
+        Location(latitude: 24.16484008098508, longitude: 120.66613588482141),
+        Location(latitude: 24.16793112650773, longitude: 120.66189229488373)
+    ]
+    
     // 測試軌跡
     var testTracks = [
         Location(latitude: 24.165335, longitude: 120.661776), // 公司
@@ -55,6 +62,8 @@ class ViewController: UIViewController {
     
     // 是否完成此次繪製
     var isDone = false
+    
+    var startDrawing = false
     
     // 顯示既定軌跡
     var showTrackFlag = false
@@ -93,11 +102,15 @@ class ViewController: UIViewController {
     
     @IBAction func drawButtonPressed(_ sender: UIButton) {
         resetDrawingButtonPressed(UIButton())
+        startDrawing = true
         
-        googleMgr.startAddingVertex()
+        if startDrawing {
+            googleMgr.startAddingVertex()
         
-        sender.backgroundColor = .red
-        preButtonPressed = sender
+        
+            sender.backgroundColor = .red
+            preButtonPressed = sender
+        }
     }
     
     @IBAction func drawBackButtonPressed(_ sender: UIButton) {
@@ -129,12 +142,13 @@ class ViewController: UIViewController {
         testPointFlag = false
         showTrackFlag = false
         isDone = false
+        startDrawing = false
     }
     
     @IBAction func showTrackButtonPressed(_ sender: UIButton) {
         if !showTrackFlag {
             googleMgr.resetDrawingTrack()
-            let locations = testTracks.map {
+            let locations = testPolygon.map {
                 (location: Location) -> CLLocationCoordinate2D in
                 return CLLocationCoordinate2D(latitude: location.latitude!, longitude: location.longitude!)
             }
@@ -214,20 +228,22 @@ extension ViewController: GMSMapViewDelegate {
             testPoint(cooridinate: newCoordinate)
         }
         
-        // 多邊形已畫完
-        if googleMgr.checkFinishDrawing() {
-            isDrag = .dragWithFinishDrawing
-        }
-        // 多邊形未畫完
-        else {
-            // 拖曳
-            if isDrag == .dragWithoutFinishingDrawing {
-                isDrag = .dragWithKeepDrawing
+        if startDrawing {
+            // 多邊形已畫完
+            if googleMgr.checkFinishDrawing() {
+                isDrag = .dragWithFinishDrawing
             }
-            // 非拖曳(建立新點)
+                // 多邊形未畫完
             else {
-                print("[New Point] lat: \(newCoordinate.latitude), lng: \(newCoordinate.longitude)")
-                googleMgr.newPoint(coordinate: newCoordinate, forPolygon: mapView)
+                // 拖曳
+                if isDrag == .dragWithoutFinishingDrawing {
+                    isDrag = .dragWithKeepDrawing
+                }
+                    // 非拖曳(建立新點)
+                else {
+                    print("[New Point] lat: \(newCoordinate.latitude), lng: \(newCoordinate.longitude)")
+                    googleMgr.newPoint(coordinate: newCoordinate, forPolygon: mapView)
+                }
             }
         }
     }

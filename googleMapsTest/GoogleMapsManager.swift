@@ -82,7 +82,7 @@ extension GoogleMapsManager {
         marker.position = coordinate
         marker.isDraggable = true
         marker.title = "Point" + "\(GoogleMapsData.count)" // 以 Point0/ Point1/ ... 為鍵值
-        marker.snippet = (GoogleMapsData.count == 0) ? "Original Point" : ""
+        marker.snippet = (GoogleMapsData.count == 0) ? "Original Point" : nil
         marker.icon = getMarkImage(withColor: .orange)
         marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
         marker.map = mapView
@@ -108,7 +108,7 @@ extension GoogleMapsManager {
             marker.position = coordinate
             marker.isDraggable = false
             marker.title = "Point" + "\(index)"
-            marker.snippet = ""
+            marker.snippet = nil
             marker.icon = getMarkImage(withColor: .blue)
             marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
             marker.map = mapView
@@ -360,12 +360,13 @@ extension GoogleMapsManager {
         for marker in GoogleMapsData.polygonMarkers {
             
             let m = GMSMarker.init()
-            m.position    = marker.position
-            m.isDraggable = marker.isDraggable
-            m.title       = marker.title
-            m.snippet     = marker.snippet
-            m.icon        = marker.icon
-            m.map         = mapView
+            m.position     = marker.position
+            m.isDraggable  = marker.isDraggable
+            m.title        = marker.title
+            m.snippet      = marker.snippet
+            m.icon         = marker.icon
+            m.groundAnchor = marker.groundAnchor
+            m.map          = mapView
 
             GoogleMapsData.updatedPolygonMarkers.append(m)
 
