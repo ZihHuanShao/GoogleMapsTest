@@ -15,7 +15,7 @@ class GoogleMapsData {
     // 幾邊形
     static var NUM_OF_POLYGON = Int() // should be set once
     
-    // 計算多邊形已經建立幾個頂點了
+    // 計算多邊形已經建立幾個頂點了, 預設值為-1, 表示還沒開始建立
     static var count = -1
     
     // 多邊形所有頂點座標
@@ -23,6 +23,9 @@ class GoogleMapsData {
     
     // 存放多邊形所有頂點標誌
     static var polygonMarkers = [GMSMarker]()
+    
+    // 存放每次更新過(移動過)的多邊形所有頂點標誌
+    static var updatedPolygonMarkers = [GMSMarker]()
     
     // 軌跡所有頂點標誌
     static var trackMarkers = [GMSMarker]()
@@ -42,7 +45,7 @@ class GoogleMapsData {
     // 繪製多邊形的線條
     static var polygonLines = [GMSPolyline]()
     
-    // 繪製多邊形裡面的顏色
+    // 填充多邊形區塊顏色
     static var polygonObject = GMSPolygon.init()
 }
 
@@ -84,9 +87,8 @@ extension GoogleMapsManager {
         marker.map = mapView
         
         GoogleMapsData.polygonPoints.append(coordinate) // 存頂點
-        GoogleMapsData.polygonMarkers.append(marker) // 存標誌
-        
-        GoogleMapsData.polygonPath.add(coordinate) // 存要畫線的路徑
+        GoogleMapsData.polygonMarkers.append(marker)    // 存標誌
+        GoogleMapsData.polygonPath.add(coordinate)      // 存要畫線的路徑
         
         // 每次畫完一個頂點GoogleMapsData.count就加一
         GoogleMapsData.count += 1
@@ -116,15 +118,23 @@ extension GoogleMapsManager {
     }
     
     func deletePreviousPonint(mapView: GMSMapView) {
+        
         if GoogleMapsData.count >= 1 {
             
+            // 將地圖上顯示的最後一個標誌清掉
+            GoogleMapsData.polygonMarkers[GoogleMapsData.count - 1].map = nil
             
-            GoogleMapsData.polygonPoints.removeLast()
+            // 移除最後一個標誌
             GoogleMapsData.polygonMarkers.removeLast()
+            
+            // 移除最後一個頂點
+            GoogleMapsData.polygonPoints.removeLast()
+            
+            // 移除最後一條線的路徑
+            
             GoogleMapsData.polygonPath.removeLastCoordinate()
             
             if !checkFinishDrawing() {
-                mapView.clear()
                 reDrawing(mapView: mapView)
             }
             GoogleMapsData.count -= 1
@@ -140,28 +150,28 @@ extension GoogleMapsManager {
         return contains(polygon: polygon, test: testPoint)
     }
     
-    // 選擇為幾邊形
-    func setNumOfPolygon(num: Int) {
-        GoogleMapsData.count = num
-        GoogleMapsData.NUM_OF_POLYGON = num
-    }
-    
     func startAddingVertex() {
         GoogleMapsData.count = 0
     }
     
-    func finishAddingVertex(mapView: GMSMapView) {
+    func finishAddingVertex(mapView: GMSMapView) -> Bool{
         if GoogleMapsData.count >= 3 {
+            // 設定目前為幾邊刑
             GoogleMapsData.NUM_OF_POLYGON = GoogleMapsData.count
+            
+            // 設定以繪製完成
             GoogleMapsManager.isFinishDrawing = true
             
             if checkFinishDrawing() {
                 GoogleMapsData.polygonPath.add(GoogleMapsData.polygonPoints[0])
             }
+            
             drawPolygon(mapView: mapView)
             
+            return true
         } else {
             print("至少繪製三個點")
+            return false
         }
     }
     
@@ -192,6 +202,10 @@ extension GoogleMapsManager {
         for marker in GoogleMapsData.polygonMarkers {
             marker.map = nil
         }
+        for marker in GoogleMapsData.updatedPolygonMarkers {
+            marker.map = nil
+        }
+
     }
     
     // 移除多邊形
@@ -210,7 +224,6 @@ extension GoogleMapsManager {
         mapView.clear()
         resetDrawingPolygon()
         resetDrawingTrack()
-//        setNumOfPolygon(num: 0)
         GoogleMapsData.count = -1
         GoogleMapsManager.isFinishDrawing = false
         
@@ -219,6 +232,7 @@ extension GoogleMapsManager {
     func resetDrawingPolygon() {
         GoogleMapsData.polygonPoints.removeAll()
         GoogleMapsData.polygonMarkers.removeAll()
+        GoogleMapsData.updatedPolygonMarkers.removeAll()
         GoogleMapsData.polygonLines.removeAll()
         GoogleMapsData.polygonPath.removeAllCoordinates()
     }
@@ -249,7 +263,6 @@ extension GoogleMapsManager {
                 }
             }
         }
-        mapView.clear()
         reDrawing(mapView: mapView)
     }
 }
@@ -317,6 +330,7 @@ extension GoogleMapsManager {
         removePolygonColor() // 多邊形裡面的顏色
         
         // 2.清空在繪製地圖時用到的陣列
+        GoogleMapsData.updatedPolygonMarkers.removeAll()
         GoogleMapsData.polygonLines.removeAll()
         
         
@@ -330,6 +344,8 @@ extension GoogleMapsManager {
             m.snippet     = marker.snippet
             m.icon        = marker.icon
             m.map         = mapView
+
+            GoogleMapsData.updatedPolygonMarkers.append(m)
 
         }
         drawPolygon(mapView: mapView)

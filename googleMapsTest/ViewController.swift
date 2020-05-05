@@ -17,9 +17,9 @@ struct Location {
 }
 
 enum DragType: Int {
-    case dragWithFinishDrawing   = 0
-    case dragWithKeepDrawing     = 1
-    case dragNotFinishDrawingYet = 2
+    case dragWithFinishDrawing       = 0 // 移動頂點 && 多邊形還已繪製完
+    case dragWithoutFinishingDrawing = 1 // 移動頂點 && 多邊形還沒繪製完
+    case dragWithKeepDrawing         = 2 // 建立新頂點
 }
 
 class ViewController: UIViewController {
@@ -40,18 +40,23 @@ class ViewController: UIViewController {
         Location(latitude: 24.168761, longitude: 120.648773)
     ]
     
+    // 向使用者取得定位權限
     var myLocationMgr: CLLocationManager!
     
     var path: GMSMutablePath!
     
     var preButtonPressed = UIButton()
     
+    // 測試某點是否位於多邊形內
     var testPointFlag = false
     
-    var currentCooridinate: CLLocationCoordinate2D?
-    
+    // 判斷是拖曳或是建立頂點
     var isDrag: DragType!
     
+    // 是否完成此次繪製
+    var isDone = false
+    
+    // 顯示既定軌跡
     var showTrackFlag = false
     
     let googleMgr = GoogleMapsManager.shareInstance
@@ -84,33 +89,7 @@ class ViewController: UIViewController {
     }
     
     // MARK: - IBActions
-    
-    @IBAction func selectNumOfPolygonButtonPressed(_ sender: UIButton) {
-        
-        resetDrawingButtonPressed(UIButton())
 
-        
-        switch sender.tag {
-        case 3:
-            googleMgr.setNumOfPolygon(num: 3)
-            
-        case 4:
-            googleMgr.setNumOfPolygon(num: 4)
-            
-        case 5:
-            googleMgr.setNumOfPolygon(num: 5)
-            
-        case 6:
-            googleMgr.setNumOfPolygon(num: 6)
-            
-        default:
-            break
-        }
-        
-        sender.backgroundColor = .red
-        preButtonPressed = sender
-    }
-    
     
     @IBAction func drawButtonPressed(_ sender: UIButton) {
         resetDrawingButtonPressed(UIButton())
@@ -122,12 +101,21 @@ class ViewController: UIViewController {
     }
     
     @IBAction func drawBackButtonPressed(_ sender: UIButton) {
-        googleMgr.deletePreviousPonint(mapView: mapView)
+        if !isDone {
+            googleMgr.deletePreviousPonint(mapView: mapView)
+        }
     }
     
     @IBAction func finishDrawingButtonPressed(_ sender: UIButton) {
-        googleMgr.finishAddingVertex(mapView: mapView)
-        
+        // 至少要畫三個點才能按完成, 若沒有則跳警告
+        if !isDone {
+            if googleMgr.finishAddingVertex(mapView: mapView) {
+                preButtonPressed.backgroundColor = .orange
+                isDone = true
+            } else {
+                showAlert(title: "請至少繪製三個點", message: "")
+            }
+        }
     }
     
     @IBAction func newTestPoint(_ sender: UIButton) {
@@ -140,6 +128,7 @@ class ViewController: UIViewController {
         preButtonPressed.backgroundColor = .orange
         testPointFlag = false
         showTrackFlag = false
+        isDone = false
     }
     
     @IBAction func showTrackButtonPressed(_ sender: UIButton) {
@@ -186,8 +175,8 @@ extension ViewController {
         mapView.delegate = self
     }
     
-    private func showAlert(message: String) {
-        let alert = UIAlertController(title: "是否有在區域內？", message: message, preferredStyle: .alert)
+    private func showAlert(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
    
         let okAction = UIAlertAction(title: "OK", style: UIAlertAction.Style.default, handler: {(UIAlertAction) -> Void in
             self.testPointFlag = false
@@ -204,9 +193,9 @@ extension ViewController {
         // 若測試點與頂點為同一點, 則算在多邊形內
         // 檢查該點是否又在多邊形內
         if googleMgr.checkIsInPolygon(coordinate: cooridinate) {
-            showAlert(message: "是")
+            showAlert(title: "是否有在區域內？", message: "是")
         } else {
-            showAlert(message: "否")
+            showAlert(title: "是否有在區域內？", message: "否")
         }
     }
 }
@@ -218,8 +207,6 @@ extension ViewController: GMSMapViewDelegate {
     // 長按
     func mapView(_ mapView: GMSMapView, didLongPressAt coordinate: CLLocationCoordinate2D) {
         let newCoordinate = coordinate
-        currentCooridinate = newCoordinate
-        
         print("[didLongPressAt]: \(coordinate)")
         
         if testPointFlag {
@@ -229,13 +216,12 @@ extension ViewController: GMSMapViewDelegate {
         
         // 多邊形已畫完
         if googleMgr.checkFinishDrawing() {
-            currentCooridinate = nil
             isDrag = .dragWithFinishDrawing
         }
         // 多邊形未畫完
         else {
             // 拖曳
-            if isDrag == .dragNotFinishDrawingYet {
+            if isDrag == .dragWithoutFinishingDrawing {
                 isDrag = .dragWithKeepDrawing
             }
             // 非拖曳(建立新點)
@@ -254,14 +240,9 @@ extension ViewController: GMSMapViewDelegate {
     func mapView(_ mapView: GMSMapView, didBeginDragging marker: GMSMarker) {
         print("[didBeginDragging]: \(marker.position)")
         
-        // 多邊形未畫完, currentCooridinate一定有值, 再來判斷現在是拖曳哪個頂點, 然後在didDrag更新現在移動的位置
+        // 多邊形未畫完, isDrag設為dragNotFinishDrawingYet
         if !googleMgr.checkFinishDrawing() {
-            if let _currentCooridinate = currentCooridinate {
-                if (_currentCooridinate.latitude == marker.position.latitude &&
-                    _currentCooridinate.longitude == marker.position.longitude) {
-                    isDrag = .dragNotFinishDrawingYet
-                }
-            }
+            isDrag = .dragWithoutFinishingDrawing
         }
     }
     
@@ -272,17 +253,13 @@ extension ViewController: GMSMapViewDelegate {
         googleMgr.modifyPoint(newMarker: marker, mapView: mapView)
         
         /*---
-        // 多邊形已畫完
         if googleMgr.checkFinishDrawing() {
-         
-        }
-        // 多邊形未畫完
-        else {
-            if isDrag == .dragNotFinishDrawingYet || isDrag == .dragWithKeepDrawing {
-         
-            }
+            // 多邊形已畫完
+        } else {
+            // 多邊形未畫完
         }
         ---*/
+        
     }
     
     // 結束拖曳
@@ -292,7 +269,7 @@ extension ViewController: GMSMapViewDelegate {
         if googleMgr.checkFinishDrawing() {
             isDrag = .dragWithFinishDrawing
         } else {
-            isDrag = .dragNotFinishDrawingYet
+            isDrag = .dragWithoutFinishingDrawing
         }
         //mapView.reloadInputViews()
     }
