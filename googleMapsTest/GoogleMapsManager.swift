@@ -83,7 +83,8 @@ extension GoogleMapsManager {
         marker.isDraggable = true
         marker.title = "Point" + "\(GoogleMapsData.count)" // 以 Point0/ Point1/ ... 為鍵值
         marker.snippet = (GoogleMapsData.count == 0) ? "Original Point" : ""
-        marker.icon = UIImage(named: "warning-icon")
+        marker.icon = getMarkImage(withColor: .orange)
+        marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
         marker.map = mapView
         
         GoogleMapsData.polygonPoints.append(coordinate) // 存頂點
@@ -108,7 +109,8 @@ extension GoogleMapsManager {
             marker.isDraggable = false
             marker.title = "Point" + "\(index)"
             marker.snippet = ""
-            marker.icon = UIImage(named: "walk-icon")
+            marker.icon = getMarkImage(withColor: .blue)
+            marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
             marker.map = mapView
             
             GoogleMapsData.trackMarkers.append(marker)
@@ -271,6 +273,26 @@ extension GoogleMapsManager {
 
 extension GoogleMapsManager {
     
+    private func getMarkImage(withColor color: UIColor) -> UIImage{
+        // 外圈
+        let markView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
+        markView.backgroundColor = color
+        markView.layer.cornerRadius = markView.frame.size.width / 2
+        markView.clipsToBounds = true
+        
+        // 內圈
+        let markSubView = UIView(frame: CGRect(x: 0, y: 0, width: 8, height: 8))
+        markSubView.center = CGPoint(x: markView.bounds.size.width / 2, y: markView.bounds.size.height / 2)
+        markSubView.backgroundColor = .white
+        markSubView.layer.cornerRadius = markSubView.frame.size.width / 2
+        markSubView.clipsToBounds = true
+        
+
+        markView.addSubview(markSubView)
+        
+        return markView.asImage()
+    }
+    
     // 算出該點有沒有在多邊形內
     private func contains(polygon: [CGPoint], test: CGPoint) -> Bool {
         if polygon.count <= 1 {
@@ -349,5 +371,26 @@ extension GoogleMapsManager {
 
         }
         drawPolygon(mapView: mapView)
+    }
+}
+
+// MARK:- UIView: New Method
+
+extension UIView {
+    
+    // UIView convert to UIImage
+    func asImage() -> UIImage {
+        if #available(iOS 10.0, *) {
+            let renderer = UIGraphicsImageRenderer(bounds: bounds)
+            return renderer.image { rendererContext in
+                layer.render(in: rendererContext.cgContext)
+            }
+        } else {
+            UIGraphicsBeginImageContext(self.frame.size)
+            self.layer.render(in:UIGraphicsGetCurrentContext()!)
+            let image = UIGraphicsGetImageFromCurrentImageContext()
+            UIGraphicsEndImageContext()
+            return UIImage(cgImage: image!.cgImage!)
+        }
     }
 }

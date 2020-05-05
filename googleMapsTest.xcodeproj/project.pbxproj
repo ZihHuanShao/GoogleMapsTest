@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		F040F0F69AA010A1FA3A8BDC /* Pods_googleMapsTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DA92DB49124A052D90C3149D /* Pods_googleMapsTest.framework */; };
-		F24F8A97242348FB004BB388 /* warning-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = F24F8A96242348FB004BB388 /* warning-icon.png */; };
-		F293373D2429970C007A8B08 /* walk-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = F293373C2429970C007A8B08 /* walk-icon.png */; };
 		F2BC1D2C2420683300C7C7D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BC1D2B2420683300C7C7D4 /* AppDelegate.swift */; };
 		F2BC1D2E2420683300C7C7D4 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2BC1D2D2420683300C7C7D4 /* ViewController.swift */; };
 		F2BC1D312420683300C7C7D4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F2BC1D2F2420683300C7C7D4 /* Main.storyboard */; };
@@ -22,8 +20,6 @@
 		B59CD02F3F7550A4551F0FDF /* Pods-googleMapsTest.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-googleMapsTest.debug.xcconfig"; path = "Target Support Files/Pods-googleMapsTest/Pods-googleMapsTest.debug.xcconfig"; sourceTree = "<group>"; };
 		C4BF87DEC94347DD9FFBB439 /* Pods-googleMapsTest.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-googleMapsTest.release.xcconfig"; path = "Target Support Files/Pods-googleMapsTest/Pods-googleMapsTest.release.xcconfig"; sourceTree = "<group>"; };
 		DA92DB49124A052D90C3149D /* Pods_googleMapsTest.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_googleMapsTest.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F24F8A96242348FB004BB388 /* warning-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "warning-icon.png"; sourceTree = "<group>"; };
-		F293373C2429970C007A8B08 /* walk-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "walk-icon.png"; sourceTree = "<group>"; };
 		F2BC1D282420683300C7C7D4 /* googleMapsTest.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = googleMapsTest.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2BC1D2B2420683300C7C7D4 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		F2BC1D2D2420683300C7C7D4 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -89,8 +85,6 @@
 				F2BC1D3F2420A90B00C7C7D4 /* GoogleMapsManager.swift */,
 				F2BC1D2F2420683300C7C7D4 /* Main.storyboard */,
 				F2BC1D322420683B00C7C7D4 /* Assets.xcassets */,
-				F293373C2429970C007A8B08 /* walk-icon.png */,
-				F24F8A96242348FB004BB388 /* warning-icon.png */,
 				F2BC1D342420683B00C7C7D4 /* LaunchScreen.storyboard */,
 				F2BC1D372420683B00C7C7D4 /* Info.plist */,
 			);
@@ -157,9 +151,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F24F8A97242348FB004BB388 /* warning-icon.png in Resources */,
 				F2BC1D362420683B00C7C7D4 /* LaunchScreen.storyboard in Resources */,
-				F293373D2429970C007A8B08 /* walk-icon.png in Resources */,
 				F2BC1D332420683B00C7C7D4 /* Assets.xcassets in Resources */,
 				F2BC1D312420683300C7C7D4 /* Main.storyboard in Resources */,
 			);
