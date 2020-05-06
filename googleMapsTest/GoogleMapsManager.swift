@@ -10,8 +10,10 @@ import Foundation
 import GoogleMaps
 
 // MARK: - Class Data
+// 有關地圖繪製所需要的所有資訊
 
-class GoogleMapsData {
+fileprivate class GoogleMapsData {
+    
     // 幾邊形
     static var NUM_OF_POLYGON = Int() // should be set once
     
@@ -36,7 +38,7 @@ class GoogleMapsData {
     // 用來描述軌跡的物件, 把要畫多邊形的路徑線條存起來
     static var trackPath = GMSMutablePath()
     
-    // 測試點
+    // 測試點有沒有在多邊形內
     static let testMarker = GMSMarker()
     
     // 繪製軌跡
@@ -100,7 +102,48 @@ extension GoogleMapsManager {
         
     }
     
-    // 建立軌跡的每一個頂點
+    // 編輯已存在的電子圍籬
+    func editPoints(coordinates: [CLLocationCoordinate2D], forTrack mapView: GMSMapView) {
+        
+        // 設定此電子圍籬為幾邊形.
+        // EX: 實際上三邊(角)形會有四個頂點, 第四個點(座標同第一個點)是為了要把最後一條連接原點的線畫出來, 所以必須再減一才是我們一般認知的三邊形
+        GoogleMapsData.NUM_OF_POLYGON = coordinates.count - 1
+        
+        startAddingVertex()
+        
+        for (index, coordinate) in coordinates.enumerated() {
+            
+            // 是否為最後一個頂點
+            if index == coordinates.count - 1 {
+                // 把路徑的最後一個點的座標設為原點座標, 因為要把最後一條連接原點的線畫出來, 所以現在的GoogleMapsData.count為4
+                GoogleMapsData.polygonPath.add(GoogleMapsData.polygonPoints[0])
+                
+                // 設定已繪製完成, 讓多邊形填充內部顏色
+                GoogleMapsManager.isFinishDrawing = true
+            } else {
+                let marker = GMSMarker()
+                
+                marker.position = coordinate
+                marker.isDraggable = true
+                marker.title = "Point" + "\(index)"
+                marker.snippet = (GoogleMapsData.count == 0) ? "Original Point" : nil
+                marker.icon = getMarkImage(withColor: .orange)
+                marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
+                marker.map = mapView
+                
+                GoogleMapsData.polygonPoints.append(coordinate) // 存頂點
+                GoogleMapsData.polygonMarkers.append(marker)    // 存標誌
+                GoogleMapsData.polygonPath.add(coordinate)      // 存要畫線的路徑
+                
+                // 每次畫完一個頂點GoogleMapsData.count就加一
+                GoogleMapsData.count += 1
+            }
+            
+            drawPolygon(mapView: mapView)
+        }
+    }
+    
+    // 建立軌跡的每一個頂點, 單純顯示軌跡
     func newPoints(coordinates: [CLLocationCoordinate2D], forTrack mapView: GMSMapView) {
         for (index, coordinate) in coordinates.enumerated() {
             let marker = GMSMarker()
@@ -145,6 +188,8 @@ extension GoogleMapsManager {
     
     func checkIsInPolygon(coordinate: CLLocationCoordinate2D) -> Bool {
         let testPoint = CGPoint(x: coordinate.latitude, y: coordinate.longitude)
+        
+        // 不取最後一點原點, 幾邊形則取幾個頂點. EX: 五邊形取五個頂點
         let polygon = GoogleMapsData.polygonPoints.map {
             (coor: CLLocationCoordinate2D) -> CGPoint in
             return CGPoint(x: coor.latitude, y: coor.longitude)
@@ -157,14 +202,18 @@ extension GoogleMapsManager {
     }
     
     func finishAddingVertex(mapView: GMSMapView) -> Bool{
+        
+        // 目前已建立的多邊形頂點數目
         if GoogleMapsData.count >= 3 {
-            // 設定目前為幾邊刑
+            // 設定目前為幾邊形
             GoogleMapsData.NUM_OF_POLYGON = GoogleMapsData.count
             
-            // 設定以繪製完成
+            // 設定已繪製完成
             GoogleMapsManager.isFinishDrawing = true
             
+            // 檢查是否已經繪製完成
             if checkFinishDrawing() {
+                // 把路徑的最後一個點的座標設為原點座標, 因為要把最後一條連接原點的線畫出來, 所以現在的GoogleMapsData.count為4
                 GoogleMapsData.polygonPath.add(GoogleMapsData.polygonPoints[0])
             }
             
@@ -253,19 +302,33 @@ extension GoogleMapsManager {
                 GoogleMapsData.polygonPoints[index] = newMarker.position
                 GoogleMapsData.polygonPath.replaceCoordinate(at: UInt(index), with: newMarker.position)
             }
+        }
+        
+        // 多邊形已畫完
+        if checkFinishDrawing() {
+            // 原點(第一個點)鍵值
+            let originalPoint = "Point0"
             
-            // 多邊形已畫完
-            if checkFinishDrawing() {
-                // 原點(第一個點)鍵值
-                let originalPoint = "Point0"
-                
-                // 如果現在移動的是原點, 也一併把路徑的最後一個點重設為原點, 因為要把最後一個頂點連接原點的線畫出來
-                if newMarker.title == originalPoint {
-                    GoogleMapsData.polygonPath.replaceCoordinate(at: UInt(GoogleMapsData.NUM_OF_POLYGON), with: GoogleMapsData.polygonPoints[0])
-                }
+            // 如果現在移動的是原點, 也一併把路徑的最後一個點重設為原點, 因為要把最後一個頂點連接原點的線畫出來
+            if newMarker.title == originalPoint {
+                GoogleMapsData.polygonPath.replaceCoordinate(at: UInt(GoogleMapsData.NUM_OF_POLYGON), with: GoogleMapsData.polygonPoints[0])
             }
         }
         reDrawing(mapView: mapView)
+    }
+    
+    func getUpdatedPoints() -> [Location] {
+        var newLocations = [Location]()
+        for newPolygonPoint in GoogleMapsData.polygonPoints {
+            newLocations.append(
+                Location(latitude: newPolygonPoint.latitude, longitude: newPolygonPoint.longitude)
+            )
+        }
+        
+        // 最後一個點設為原點座標
+        newLocations.append(Location(latitude: GoogleMapsData.polygonPoints[0].latitude, longitude: GoogleMapsData.polygonPoints[0].longitude))
+        
+        return newLocations
     }
 }
 

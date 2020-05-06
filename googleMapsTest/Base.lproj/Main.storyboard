@@ -66,6 +66,36 @@
                                     <action selector="showTrackButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="6o2-HF-Mxq"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" alpha="0.80000001192092896" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="kQp-Do-vML">
+                                <rect key="frame" x="348" y="254" width="46" height="50"/>
+                                <color key="backgroundColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="Cz4-BE-I5c"/>
+                                    <constraint firstAttribute="width" constant="46" id="sbx-6f-aqI"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <state key="normal" title="Edit Fence">
+                                    <color key="titleColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                </state>
+                                <connections>
+                                    <action selector="editFenceButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="yfM-8I-vMa"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" alpha="0.80000001192092896" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="wordWrap" translatesAutoresizingMaskIntoConstraints="NO" id="m2L-I0-YGe">
+                                <rect key="frame" x="348" y="324" width="46" height="50"/>
+                                <color key="backgroundColor" systemColor="systemPinkColor" red="1" green="0.1764705882" blue="0.33333333329999998" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="50" id="66Z-v6-Tf9"/>
+                                    <constraint firstAttribute="width" constant="46" id="ZBT-YP-Bsa"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="boldSystem" pointSize="15"/>
+                                <state key="normal" title="Edit Done">
+                                    <color key="titleColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="editFinishButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="xnn-aT-a1P"/>
+                                </connections>
+                            </button>
                             <button opaque="NO" alpha="0.80000000000000004" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="GoH-No-95t">
                                 <rect key="frame" x="20" y="64" width="30" height="30"/>
                                 <color key="backgroundColor" red="1" green="0.57637232540000005" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -130,10 +160,15 @@
                             <constraint firstItem="gjB-C0-nsk" firstAttribute="centerY" secondItem="fPH-wH-o4O" secondAttribute="centerY" id="fpU-ip-eNE"/>
                             <constraint firstItem="126-ZJ-bbF" firstAttribute="centerY" secondItem="GoH-No-95t" secondAttribute="centerY" id="iHG-Zk-ska"/>
                             <constraint firstItem="126-ZJ-bbF" firstAttribute="leading" secondItem="GoH-No-95t" secondAttribute="trailing" constant="20" id="nVw-vF-9i8"/>
+                            <constraint firstItem="kQp-Do-vML" firstAttribute="top" secondItem="rT4-Ez-W7u" secondAttribute="bottom" constant="20" id="nq1-c3-XTb"/>
+                            <constraint firstItem="kQp-Do-vML" firstAttribute="centerX" secondItem="rT4-Ez-W7u" secondAttribute="centerX" id="oVq-lc-dGt"/>
+                            <constraint firstItem="m2L-I0-YGe" firstAttribute="top" secondItem="kQp-Do-vML" secondAttribute="bottom" constant="20" id="s2s-Ay-k65"/>
+                            <constraint firstItem="m2L-I0-YGe" firstAttribute="centerX" secondItem="kQp-Do-vML" secondAttribute="centerX" id="vcp-5M-byg"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <connections>
+                        <outlet property="editFinishButton" destination="m2L-I0-YGe" id="w54-y2-Is0"/>
                         <outlet property="mapView" destination="kut-OJ-ykp" id="0Di-Cr-FRC"/>
                     </connections>
                 </viewController>

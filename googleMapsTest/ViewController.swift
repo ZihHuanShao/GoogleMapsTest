@@ -68,17 +68,22 @@ class ViewController: UIViewController {
     // 顯示既定軌跡
     var showTrackFlag = false
     
+    // 是否編輯既有圍籬
+    var editFenceFlag = false
+    
     let googleMgr = GoogleMapsManager.shareInstance
     
     // MARK: - IBOutlet
     
     @IBOutlet weak var mapView: GMSMapView!
-
+    @IBOutlet weak var editFinishButton: UIButton!
+    
     // MARK: - Life Cycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        editFinishButton.isHidden = true
         updateDataSource()
     }
 
@@ -143,12 +148,13 @@ class ViewController: UIViewController {
         showTrackFlag = false
         isDone = false
         startDrawing = false
+        editFenceFlag = false
     }
     
     @IBAction func showTrackButtonPressed(_ sender: UIButton) {
         if !showTrackFlag {
             googleMgr.resetDrawingTrack()
-            let locations = testPolygon.map {
+            let locations = testTracks.map {
                 (location: Location) -> CLLocationCoordinate2D in
                 return CLLocationCoordinate2D(latitude: location.latitude!, longitude: location.longitude!)
             }
@@ -160,6 +166,35 @@ class ViewController: UIViewController {
             showTrackFlag = false
         }
     }
+    
+    @IBAction func editFenceButtonPressed(_ sender: UIButton) {
+        resetDrawingButtonPressed(UIButton())
+        if !editFenceFlag {
+            
+            editFinishButton.isHidden = false
+            
+            // 因為是編輯已存在的多邊形, 所以設true, 且也要擋掉能夠點擊上一步的按鈕
+            isDone = true
+            
+            googleMgr.resetDrawingTrack()
+            let locations = testPolygon.map {
+                (location: Location) -> CLLocationCoordinate2D in
+                return CLLocationCoordinate2D(latitude: location.latitude!, longitude: location.longitude!)
+            }
+            googleMgr.editPoints(coordinates: locations, forTrack: mapView)
+            editFenceFlag = true
+        }
+    }
+    
+    @IBAction func editFinishButtonPressed(_ sender: UIButton) {
+        
+        editFinishButton.isHidden = true
+        
+        testPolygon = googleMgr.getUpdatedPoints()
+        
+        resetDrawingButtonPressed(UIButton())
+    }
+    
 }
 
 // MARK: - Private Functions
@@ -233,13 +268,13 @@ extension ViewController: GMSMapViewDelegate {
             if googleMgr.checkFinishDrawing() {
                 isDrag = .dragWithFinishDrawing
             }
-                // 多邊形未畫完
+            // 多邊形未畫完
             else {
                 // 拖曳
                 if isDrag == .dragWithoutFinishingDrawing {
                     isDrag = .dragWithKeepDrawing
                 }
-                    // 非拖曳(建立新點)
+                // 非拖曳(建立新點)
                 else {
                     print("[New Point] lat: \(newCoordinate.latitude), lng: \(newCoordinate.longitude)")
                     googleMgr.newPoint(coordinate: newCoordinate, forPolygon: mapView)
