@@ -11,11 +11,6 @@ import MapKit
 import GoogleMaps
 import GooglePlaces
 
-struct Location {
-    var latitude: CLLocationDegrees?
-    var longitude: CLLocationDegrees?
-}
-
 enum DragType: Int {
     case dragWithFinishDrawing       = 0 // 移動頂點 && 多邊形還已繪製完
     case dragWithoutFinishingDrawing = 1 // 移動頂點 && 多邊形還沒繪製完
@@ -27,24 +22,24 @@ class ViewController: UIViewController {
     // MAEK: - Properties
     
     var testPolygon = [
-        Location(latitude: 24.16793112650773, longitude: 120.66189229488373),
-        Location(latitude: 24.162774040111515, longitude: 120.66071547567844),
-        Location(latitude: 24.16484008098508, longitude: 120.66613588482141),
-        Location(latitude: 24.16793112650773, longitude: 120.66189229488373)
+        CLLocationCoordinate2D(latitude: 24.16793112650773, longitude: 120.66189229488373),
+        CLLocationCoordinate2D(latitude: 24.162774040111515, longitude: 120.66071547567844),
+        CLLocationCoordinate2D(latitude: 24.16484008098508, longitude: 120.66613588482141),
+        CLLocationCoordinate2D(latitude: 24.16793112650773, longitude: 120.66189229488373)
     ]
     
     // 測試軌跡
     var testTracks = [
-        Location(latitude: 24.165335, longitude: 120.661776), // 公司
-        Location(latitude: 24.164990, longitude: 120.661452),
-        Location(latitude: 24.164589, longitude: 120.660695),
-        Location(latitude: 24.164552, longitude: 120.659171),
-        Location(latitude: 24.164954, longitude: 120.657680),
-        Location(latitude: 24.166520, longitude: 120.652608),
-        Location(latitude: 24.165967, longitude: 120.652050),
-        Location(latitude: 24.166755, longitude: 120.650382),
-        Location(latitude: 24.167166, longitude: 120.650452),
-        Location(latitude: 24.168761, longitude: 120.648773)
+        CLLocationCoordinate2D(latitude: 24.165335, longitude: 120.661776), // 公司
+        CLLocationCoordinate2D(latitude: 24.164990, longitude: 120.661452),
+        CLLocationCoordinate2D(latitude: 24.164589, longitude: 120.660695),
+        CLLocationCoordinate2D(latitude: 24.164552, longitude: 120.659171),
+        CLLocationCoordinate2D(latitude: 24.164954, longitude: 120.657680),
+        CLLocationCoordinate2D(latitude: 24.166520, longitude: 120.652608),
+        CLLocationCoordinate2D(latitude: 24.165967, longitude: 120.652050),
+        CLLocationCoordinate2D(latitude: 24.166755, longitude: 120.650382),
+        CLLocationCoordinate2D(latitude: 24.167166, longitude: 120.650452),
+        CLLocationCoordinate2D(latitude: 24.168761, longitude: 120.648773)
     ]
     
     // 向使用者取得定位權限
@@ -154,10 +149,7 @@ class ViewController: UIViewController {
     @IBAction func showTrackButtonPressed(_ sender: UIButton) {
         if !showTrackFlag {
             googleMgr.resetDrawingTrack()
-            let locations = testTracks.map {
-                (location: Location) -> CLLocationCoordinate2D in
-                return CLLocationCoordinate2D(latitude: location.latitude!, longitude: location.longitude!)
-            }
+            let locations = testTracks
             googleMgr.newPoints(coordinates: locations, forTrack: mapView)
             showTrackFlag = true
         } else {
@@ -177,10 +169,7 @@ class ViewController: UIViewController {
             isDone = true
             
             googleMgr.resetDrawingTrack()
-            let locations = testPolygon.map {
-                (location: Location) -> CLLocationCoordinate2D in
-                return CLLocationCoordinate2D(latitude: location.latitude!, longitude: location.longitude!)
-            }
+            let locations = testPolygon
             googleMgr.editPoints(coordinates: locations, forTrack: mapView)
             editFenceFlag = true
         }
@@ -190,7 +179,7 @@ class ViewController: UIViewController {
         
         editFinishButton.isHidden = true
         
-        testPolygon = googleMgr.getUpdatedPoints()
+        testPolygon = googleMgr.getPoints()
         
         resetDrawingButtonPressed(UIButton())
     }

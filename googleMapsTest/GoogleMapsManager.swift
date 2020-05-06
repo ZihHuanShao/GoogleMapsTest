@@ -67,6 +67,23 @@ class GoogleMapsManager {
 
 extension GoogleMapsManager {
     
+    // 取得目前多邊形所有頂點座標(包含最後一個同原點座標的頂點)
+    func getPoints() -> [CLLocationCoordinate2D] {
+        
+        var newLocations = [CLLocationCoordinate2D]()
+        
+        for newPolygonPoint in GoogleMapsData.polygonPoints {
+            newLocations.append(
+                CLLocationCoordinate2D(latitude: newPolygonPoint.latitude, longitude: newPolygonPoint.longitude)
+            )
+        }
+        
+        // 最後一個點設為原點座標
+        newLocations.append(CLLocationCoordinate2D(latitude: GoogleMapsData.polygonPoints[0].latitude, longitude: GoogleMapsData.polygonPoints[0].longitude))
+        
+        return newLocations
+    }
+    
     // 建立測試點
     func newTestPoint(coordinate: CLLocationCoordinate2D, mapView: GMSMapView) {
         GoogleMapsData.testMarker.position = coordinate
@@ -85,7 +102,7 @@ extension GoogleMapsManager {
         marker.isDraggable = true
         marker.title = "Point" + "\(GoogleMapsData.count)" // 以 Point0/ Point1/ ... 為鍵值
         marker.snippet = (GoogleMapsData.count == 0) ? "Original Point" : nil
-        marker.icon = getMarkImage(withColor: .orange)
+        marker.icon = getMarkImage(withColor: UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0))
         marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
         marker.map = mapView
         
@@ -127,7 +144,7 @@ extension GoogleMapsManager {
                 marker.isDraggable = true
                 marker.title = "Point" + "\(index)"
                 marker.snippet = (GoogleMapsData.count == 0) ? "Original Point" : nil
-                marker.icon = getMarkImage(withColor: .orange)
+                marker.icon = getMarkImage(withColor: UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0))
                 marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
                 marker.map = mapView
                 
@@ -152,7 +169,7 @@ extension GoogleMapsManager {
             marker.isDraggable = false
             marker.title = "Point" + "\(index)"
             marker.snippet = nil
-            marker.icon = getMarkImage(withColor: .blue)
+            marker.icon = getMarkImage(withColor: UIColorFromRGB(rgbValue: 0x0000FF, alpha: 1.0))
             marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
             marker.map = mapView
             
@@ -162,6 +179,7 @@ extension GoogleMapsManager {
         drawTrack(mapView: mapView)
     }
     
+    // 退回上一步
     func deletePreviousPonint(mapView: GMSMapView) {
         
         if GoogleMapsData.count >= 1 {
@@ -186,6 +204,7 @@ extension GoogleMapsManager {
         }
     }
     
+    // 檢查某座標是否在多邊形內
     func checkIsInPolygon(coordinate: CLLocationCoordinate2D) -> Bool {
         let testPoint = CGPoint(x: coordinate.latitude, y: coordinate.longitude)
         
@@ -197,10 +216,12 @@ extension GoogleMapsManager {
         return contains(polygon: polygon, test: testPoint)
     }
     
+    // 開始繪製多邊形頂點
     func startAddingVertex() {
         GoogleMapsData.count = 0
     }
     
+    // 完成繪製多邊形
     func finishAddingVertex(mapView: GMSMapView) -> Bool{
         
         // 目前已建立的多邊形頂點數目
@@ -292,7 +313,6 @@ extension GoogleMapsManager {
         GoogleMapsData.trackPath.removeAllCoordinates()
     }
 
-    
     // 移動多邊形某頂點時, 更新其位置
     func modifyPoint(newMarker: GMSMarker, mapView: GMSMapView) {
         for (index, marker) in GoogleMapsData.polygonMarkers.enumerated() {
@@ -316,26 +336,13 @@ extension GoogleMapsManager {
         }
         reDrawing(mapView: mapView)
     }
-    
-    func getUpdatedPoints() -> [Location] {
-        var newLocations = [Location]()
-        for newPolygonPoint in GoogleMapsData.polygonPoints {
-            newLocations.append(
-                Location(latitude: newPolygonPoint.latitude, longitude: newPolygonPoint.longitude)
-            )
-        }
-        
-        // 最後一個點設為原點座標
-        newLocations.append(Location(latitude: GoogleMapsData.polygonPoints[0].latitude, longitude: GoogleMapsData.polygonPoints[0].longitude))
-        
-        return newLocations
-    }
 }
 
 // MARK:- Private functions
 
 extension GoogleMapsManager {
     
+    // 取得標誌的圖
     private func getMarkImage(withColor color: UIColor) -> UIImage{
         // 外圈
         let markView = UIView(frame: CGRect(x: 0, y: 0, width: 20, height: 20))
@@ -380,7 +387,7 @@ extension GoogleMapsManager {
     private func drawTrack(mapView: GMSMapView) {
         GoogleMapsData.trackLine = GMSPolyline(path: GoogleMapsData.trackPath)
         GoogleMapsData.trackLine.map = mapView
-        GoogleMapsData.trackLine.strokeColor = .blue
+        GoogleMapsData.trackLine.strokeColor = UIColorFromRGB(rgbValue: 0x0000FF, alpha: 1.0)
         GoogleMapsData.trackLine.strokeWidth = 5
     }
     
@@ -388,7 +395,7 @@ extension GoogleMapsManager {
     private func drawPolygon(mapView: GMSMapView) {
         let polygonLine = GMSPolyline(path: GoogleMapsData.polygonPath)
         polygonLine.map = mapView
-        polygonLine.strokeColor = .orange // 線條顏色
+        polygonLine.strokeColor = UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0) // 線條顏色
         polygonLine.strokeWidth = 5 // 線條粗細
         
         GoogleMapsData.polygonLines.append(polygonLine)
@@ -402,8 +409,17 @@ extension GoogleMapsManager {
     private func fillPolygonColor(mapView: GMSMapView) {
         GoogleMapsData.polygonObject = GMSPolygon()
         GoogleMapsData.polygonObject.path = GoogleMapsData.polygonPath
-        GoogleMapsData.polygonObject.fillColor = UIColor(displayP3Red: 1, green: 1, blue: 0, alpha: 0.2) // 多邊形區塊顏色
+        GoogleMapsData.polygonObject.fillColor = UIColorFromRGB(rgbValue: 0xFF0000, alpha: 0.2) // 多邊形區塊顏色
         GoogleMapsData.polygonObject.map = mapView
+    }
+    
+    private func UIColorFromRGB(rgbValue: UInt, alpha: Float) -> UIColor {
+        return UIColor(
+            red:   CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
+            green: CGFloat((rgbValue & 0x00FF00) >> 8)  / 255.0,
+            blue:  CGFloat(rgbValue  & 0x0000FF)        / 255.0,
+            alpha: CGFloat(alpha)
+        )
     }
     
     private func reDrawing(mapView: GMSMapView) {
