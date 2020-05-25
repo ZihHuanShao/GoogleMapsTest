@@ -49,6 +49,9 @@ fileprivate class GoogleMapsData {
     
     // 填充多邊形區塊顏色
     static var polygonObject = GMSPolygon.init()
+    
+    // 目前所自訂的圍籬顏色
+    static var currentColor: UInt?
 }
 
 // MARK: - Class
@@ -102,7 +105,9 @@ extension GoogleMapsManager {
         marker.isDraggable = true
         marker.title = "Point" + "\(GoogleMapsData.count)" // 以 Point0/ Point1/ ... 為鍵值
         marker.snippet = (GoogleMapsData.count == 0) ? "Original Point" : nil
-        marker.icon = getMarkImage(withColor: UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0))
+        marker.icon = (GoogleMapsData.currentColor != nil) ?
+            getMarkImage(withColor: UIColorFromRGB(rgbValue: GoogleMapsData.currentColor!, alpha: 1.0)) :
+            getMarkImage(withColor: UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0))
         marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
         marker.map = mapView
         
@@ -117,6 +122,35 @@ extension GoogleMapsManager {
             drawPolygon(mapView: mapView)
         }
         
+    }
+    
+    func dragPoint(_ isEnable: Bool) {
+        for marker in GoogleMapsData.polygonMarkers {
+            marker.isDraggable = (isEnable == true) ? true : false
+        }
+    }
+    
+    func setColor(_ color: UInt) {
+        
+        GoogleMapsData.currentColor = color
+        
+        // 頂點標誌
+        for marker in GoogleMapsData.polygonMarkers {
+            marker.icon = getMarkImage(withColor: UIColorFromRGB(rgbValue: color, alpha: 1.0))
+        }
+        
+        // 移動過的標誌(未畫完之前)
+        for marker in GoogleMapsData.updatedPolygonMarkers {
+            marker.icon = getMarkImage(withColor: UIColorFromRGB(rgbValue: color, alpha: 1.0))
+        }
+        
+        // 線條顏色
+        for polygonLine in GoogleMapsData.polygonLines {
+           polygonLine.strokeColor = UIColorFromRGB(rgbValue: color, alpha: 1.0)
+        }
+        
+        // 區塊顏色
+        GoogleMapsData.polygonObject.fillColor = UIColorFromRGB(rgbValue: color, alpha: 0.2)
     }
     
     // 編輯已存在的電子圍籬
@@ -141,10 +175,12 @@ extension GoogleMapsManager {
                 let marker = GMSMarker()
                 
                 marker.position = coordinate
-                marker.isDraggable = true
+                //marker.isDraggable = true // 由dragPoint()來控制是否被拖曳
                 marker.title = "Point" + "\(index)"
                 marker.snippet = (GoogleMapsData.count == 0) ? "Original Point" : nil
-                marker.icon = getMarkImage(withColor: UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0))
+                marker.icon = (GoogleMapsData.currentColor != nil) ?
+                    getMarkImage(withColor: UIColorFromRGB(rgbValue: GoogleMapsData.currentColor!, alpha: 1.0)) :
+                    getMarkImage(withColor: UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0))
                 marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
                 marker.map = mapView
                 
@@ -169,7 +205,10 @@ extension GoogleMapsManager {
             marker.isDraggable = false
             marker.title = "Point" + "\(index)"
             marker.snippet = nil
-            marker.icon = getMarkImage(withColor: UIColorFromRGB(rgbValue: 0x0000FF, alpha: 1.0))
+            marker.icon = (GoogleMapsData.currentColor != nil) ?
+                getMarkImage(withColor: UIColorFromRGB(rgbValue: GoogleMapsData.currentColor!, alpha: 1.0)) :
+                getMarkImage(withColor: UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0))
+                
             marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
             marker.map = mapView
             
@@ -387,16 +426,24 @@ extension GoogleMapsManager {
     private func drawTrack(mapView: GMSMapView) {
         GoogleMapsData.trackLine = GMSPolyline(path: GoogleMapsData.trackPath)
         GoogleMapsData.trackLine.map = mapView
-        GoogleMapsData.trackLine.strokeColor = UIColorFromRGB(rgbValue: 0x0000FF, alpha: 1.0)
+        GoogleMapsData.trackLine.strokeColor = (GoogleMapsData.currentColor != nil) ?
+            UIColorFromRGB(rgbValue: GoogleMapsData.currentColor!, alpha: 1.0) :
+            UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0)
         GoogleMapsData.trackLine.strokeWidth = 5
     }
     
     // 繪製多邊形
     private func drawPolygon(mapView: GMSMapView) {
         let polygonLine = GMSPolyline(path: GoogleMapsData.polygonPath)
+        
         polygonLine.map = mapView
-        polygonLine.strokeColor = UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0) // 線條顏色
-        polygonLine.strokeWidth = 5 // 線條粗細
+        
+        // 線條顏色
+        polygonLine.strokeColor = (GoogleMapsData.currentColor != nil) ?
+            UIColorFromRGB(rgbValue: GoogleMapsData.currentColor!, alpha: 1.0) : UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0)
+        
+        // 線條粗細
+        polygonLine.strokeWidth = 5
         
         GoogleMapsData.polygonLines.append(polygonLine)
         
@@ -408,8 +455,13 @@ extension GoogleMapsManager {
     // 將多邊形內部填滿顏色
     private func fillPolygonColor(mapView: GMSMapView) {
         GoogleMapsData.polygonObject = GMSPolygon()
+        
         GoogleMapsData.polygonObject.path = GoogleMapsData.polygonPath
-        GoogleMapsData.polygonObject.fillColor = UIColorFromRGB(rgbValue: 0xFF0000, alpha: 0.2) // 多邊形區塊顏色
+        
+        // 多邊形區塊顏色
+        GoogleMapsData.polygonObject.fillColor = (GoogleMapsData.currentColor != nil) ?
+            UIColorFromRGB(rgbValue: GoogleMapsData.currentColor!, alpha: 0.2) : UIColorFromRGB(rgbValue: 0xFF0000, alpha: 0.2)
+        
         GoogleMapsData.polygonObject.map = mapView
     }
     

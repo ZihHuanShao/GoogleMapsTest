@@ -22,10 +22,10 @@ class ViewController: UIViewController {
     // MAEK: - Properties
     
     var testPolygon = [
-        CLLocationCoordinate2D(latitude: 24.16793112650773, longitude: 120.66189229488373),
-        CLLocationCoordinate2D(latitude: 24.162774040111515, longitude: 120.66071547567844),
-        CLLocationCoordinate2D(latitude: 24.16484008098508, longitude: 120.66613588482141),
-        CLLocationCoordinate2D(latitude: 24.16793112650773, longitude: 120.66189229488373)
+        CLLocationCoordinate2D(latitude: 24.26793112650773, longitude: 120.66189229488373),
+        CLLocationCoordinate2D(latitude: 24.262774040111515, longitude: 120.66071547567844),
+        CLLocationCoordinate2D(latitude: 24.26484008098508, longitude: 120.66613588482141),
+        CLLocationCoordinate2D(latitude: 24.26793112650773, longitude: 120.66189229488373)
     ]
     
     // 測試軌跡
@@ -84,13 +84,19 @@ class ViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         /*
-        // 調整 camera 讓 polyline 的能見度完整顯示在 MapView 上
+        // [調整 camera 讓 polyline 的能見度完整顯示在 MapView 上]
+        path = GMSMutablePath()
+        for testPolygonPoint in testPolygon {
+            path.add(testPolygonPoint)
+        }
+        
         var bounds: GMSCoordinateBounds = GMSCoordinateBounds()
         for index in 0 ..< path.count() {
             bounds = bounds.includingCoordinate(path.coordinate(at: index))
         }
         self.mapView.animate(with: GMSCameraUpdate.fit(bounds))
         */
+        
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -161,6 +167,18 @@ class ViewController: UIViewController {
     
     @IBAction func editFenceButtonPressed(_ sender: UIButton) {
         resetDrawingButtonPressed(UIButton())
+        
+        path = GMSMutablePath()
+        for testPolygonPoint in testPolygon {
+            path.add(testPolygonPoint)
+        }
+        
+        var bounds: GMSCoordinateBounds = GMSCoordinateBounds()
+        for index in 0 ..< path.count() {
+            bounds = bounds.includingCoordinate(path.coordinate(at: index))
+        }
+        self.mapView.animate(with: GMSCameraUpdate.fit(bounds))
+        
         if !editFenceFlag {
             
             editFinishButton.isHidden = false
@@ -171,6 +189,7 @@ class ViewController: UIViewController {
             googleMgr.resetDrawingTrack()
             let locations = testPolygon
             googleMgr.editPoints(coordinates: locations, forTrack: mapView)
+            googleMgr.dragPoint(true)
             editFenceFlag = true
         }
     }
@@ -179,9 +198,14 @@ class ViewController: UIViewController {
         
         editFinishButton.isHidden = true
         
+        // update原始testPolygon座標資訊
         testPolygon = googleMgr.getPoints()
         
         resetDrawingButtonPressed(UIButton())
+    }
+    
+    @IBAction func changeColorButtonPressed(_ sender: UIButton) {
+        googleMgr.setColor(0x0433FF)
     }
     
 }

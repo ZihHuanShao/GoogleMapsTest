@@ -141,11 +141,27 @@
                                     <action selector="finishDrawingButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="TMC-kr-5D4"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" alpha="0.80000001192092896" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="YEy-Hh-MTn">
+                                <rect key="frame" x="170" y="64" width="30" height="30"/>
+                                <color key="backgroundColor" red="0.015686274509803921" green="0.20000000000000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="30" id="3gB-P9-NCE"/>
+                                    <constraint firstAttribute="height" constant="30" id="jMt-sc-pES"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                <state key="normal" title="color">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="changeColorButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="UXo-Bl-hgj"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="rT4-Ez-W7u" firstAttribute="top" secondItem="1kA-nf-tmt" secondAttribute="bottom" constant="20" id="5lk-F5-ET6"/>
                             <constraint firstItem="GoH-No-95t" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="6Iv-lh-G1j"/>
+                            <constraint firstItem="YEy-Hh-MTn" firstAttribute="centerY" secondItem="gjB-C0-nsk" secondAttribute="centerY" id="DFU-PU-zlK"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="kut-OJ-ykp" secondAttribute="bottom" id="Fd1-xJ-2xF"/>
                             <constraint firstItem="rT4-Ez-W7u" firstAttribute="centerX" secondItem="fPH-wH-o4O" secondAttribute="centerX" id="GfW-rh-jlm"/>
                             <constraint firstItem="fPH-wH-o4O" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="20" id="JhN-g9-fUM"/>
@@ -155,6 +171,7 @@
                             <constraint firstItem="1kA-nf-tmt" firstAttribute="centerX" secondItem="fPH-wH-o4O" secondAttribute="centerX" id="Qkm-b5-RHV"/>
                             <constraint firstItem="GoH-No-95t" firstAttribute="centerY" secondItem="fPH-wH-o4O" secondAttribute="centerY" id="SAK-q6-of2"/>
                             <constraint firstItem="kut-OJ-ykp" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="W0t-3e-m4S"/>
+                            <constraint firstItem="YEy-Hh-MTn" firstAttribute="leading" secondItem="gjB-C0-nsk" secondAttribute="trailing" constant="20" id="WDr-gn-8CX"/>
                             <constraint firstItem="gjB-C0-nsk" firstAttribute="leading" secondItem="126-ZJ-bbF" secondAttribute="trailing" constant="20" id="ZoC-4U-sKg"/>
                             <constraint firstItem="1kA-nf-tmt" firstAttribute="top" secondItem="fPH-wH-o4O" secondAttribute="bottom" constant="20" id="fh4-92-B5C"/>
                             <constraint firstItem="gjB-C0-nsk" firstAttribute="centerY" secondItem="fPH-wH-o4O" secondAttribute="centerY" id="fpU-ip-eNE"/>
@@ -174,7 +191,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="139" y="106"/>
+            <point key="canvasLocation" x="137.68115942028987" y="105.80357142857143"/>
         </scene>
     </scenes>
 </document>
