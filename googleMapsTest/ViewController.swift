@@ -156,11 +156,23 @@ class ViewController: UIViewController {
         if !showTrackFlag {
             googleMgr.resetDrawingTrack()
             let locations = testTracks
-            googleMgr.newPoints(coordinates: locations, forTrack: mapView)
+            
+            // 無動畫
+            //googleMgr.newPoints(coordinates: locations, forTrack: mapView)
+            
+            // 有動畫
+            googleMgr.showTrackAnimation(coordinates: locations, forTrack: mapView)
+            
             showTrackFlag = true
         } else {
-            googleMgr.removeTrackMarks()
-            googleMgr.removeTrack()
+            
+            // 移除無動畫相關的繪製資訊
+            //googleMgr.removeTrackMarks()
+            //googleMgr.removeTrack()
+            
+            // 移除有動畫相關的繪製資訊
+            googleMgr.removeTrackAnimation()
+            
             showTrackFlag = false
         }
     }

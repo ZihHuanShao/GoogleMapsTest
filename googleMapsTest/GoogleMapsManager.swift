@@ -64,6 +64,12 @@ class GoogleMapsManager {
     
     // 多邊形各頂點是否已繪製完成
     static var isFinishDrawing = false
+    
+    // 建立軌跡動畫的index
+    static var at_index = 0
+    static var at_timer: Timer?
+    static var at_coords = [CLLocationCoordinate2D]()
+    static var at_mapView: GMSMapView?
 }
 
 // MARK:- Public functions
@@ -216,6 +222,77 @@ extension GoogleMapsManager {
             GoogleMapsData.trackPath.add(coordinate)
         }
         drawTrack(mapView: mapView)
+    }
+    
+    func showTrackAnimation(coordinates: [CLLocationCoordinate2D], forTrack mapView: GMSMapView) {
+        
+        removeTrackAnimation()
+        
+        GoogleMapsManager.at_mapView = mapView
+        GoogleMapsManager.at_coords = coordinates
+        GoogleMapsManager.at_timer = Timer.scheduledTimer(timeInterval: 0.25, target: self, selector: #selector(timeAction), userInfo: nil, repeats: true)
+        
+    }
+    
+    @objc func timeAction(timer: Timer) {
+        
+        let marker = GMSMarker()
+        var index = GoogleMapsManager.at_index
+        
+        if GoogleMapsManager.at_coords.count != 0 {
+            
+            let coord = GoogleMapsManager.at_coords[index]
+            marker.position = coord
+            
+            marker.isDraggable = false
+            marker.title = "Point" + "\(index)"
+            marker.snippet = nil
+            marker.icon = (GoogleMapsData.currentColor != nil) ?
+                getMarkImage(withColor: UIColorFromRGB(rgbValue: GoogleMapsData.currentColor!, alpha: 1.0)) :
+                getMarkImage(withColor: UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0))
+            
+            marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
+            marker.map = GoogleMapsManager.at_mapView
+            
+            GoogleMapsData.trackMarkers.append(marker)
+            GoogleMapsData.trackPath.add(coord)
+            
+            // render point and path UI
+            if let at_mapView = GoogleMapsManager.at_mapView {
+                drawTrack(mapView: at_mapView)
+            }
+            
+            index += 1
+            
+            //
+            if index >= GoogleMapsManager.at_coords.count {
+                GoogleMapsManager.at_timer?.invalidate()
+                GoogleMapsManager.at_timer = nil
+                GoogleMapsManager.at_index = 0
+            } else {
+                GoogleMapsManager.at_index = index
+            }
+        }
+      
+     }
+    
+    func removeTrackAnimation() {
+        
+        GoogleMapsManager.at_index = 0
+        GoogleMapsManager.at_coords.removeAll()
+        GoogleMapsManager.at_timer?.invalidate()
+        GoogleMapsManager.at_timer = nil
+        GoogleMapsManager.at_mapView?.clear()
+        GoogleMapsManager.at_mapView = nil
+        
+        for marker in GoogleMapsData.trackMarkers {
+            marker.map = nil
+        }
+        GoogleMapsData.trackMarkers.removeAll()
+        
+        GoogleMapsData.trackPath.removeAllCoordinates()
+        
+        GoogleMapsData.trackLine.map = nil
     }
     
     // 退回上一步
