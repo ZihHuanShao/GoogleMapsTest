@@ -70,6 +70,10 @@ class GoogleMapsManager {
     static var at_timer: Timer?
     static var at_coords = [CLLocationCoordinate2D]()
     static var at_mapView: GMSMapView?
+    
+    static var at_stepIndex = 0
+    static var at_stepTimer: Timer?
+    static var at_preStepMark: GMSMarker?
 }
 
 // MARK:- Public functions
@@ -231,7 +235,7 @@ extension GoogleMapsManager {
         GoogleMapsManager.at_mapView = mapView
         GoogleMapsManager.at_coords = coordinates
         GoogleMapsManager.at_timer = Timer.scheduledTimer(timeInterval: 0.25, target: self, selector: #selector(timeAction), userInfo: nil, repeats: true)
-        
+
     }
     
     @objc func timeAction(timer: Timer) {
@@ -252,6 +256,9 @@ extension GoogleMapsManager {
                 getMarkImage(withColor: UIColorFromRGB(rgbValue: 0xFF0000, alpha: 1.0))
             
             marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
+            
+            marker.zIndex = 1 // 保持在最前面
+            
             marker.map = GoogleMapsManager.at_mapView
             
             GoogleMapsData.trackMarkers.append(marker)
@@ -264,17 +271,60 @@ extension GoogleMapsManager {
             
             index += 1
             
-            //
+            // 軌跡的最後一個點, 停止繪製
             if index >= GoogleMapsManager.at_coords.count {
+
                 GoogleMapsManager.at_timer?.invalidate()
                 GoogleMapsManager.at_timer = nil
                 GoogleMapsManager.at_index = 0
+                
+                // 再模擬一次動畫
+                GoogleMapsManager.at_stepTimer = Timer.scheduledTimer(timeInterval: 0.25, target: self, selector: #selector(stepTimeAction), userInfo: nil, repeats: true)
             } else {
                 GoogleMapsManager.at_index = index
             }
         }
       
      }
+    
+    @objc func stepTimeAction(timer: Timer) {
+        let marker = GMSMarker()
+        var index = GoogleMapsManager.at_stepIndex
+            
+        if GoogleMapsManager.at_coords.count != 0 {
+            
+            // 軌跡的最後一個點, 停止繪製
+            if index >= GoogleMapsManager.at_coords.count {
+
+                GoogleMapsManager.at_stepTimer?.invalidate()
+                GoogleMapsManager.at_stepTimer = nil
+                GoogleMapsManager.at_stepIndex = 0
+                
+                GoogleMapsManager.at_preStepMark?.map = nil
+                return
+            }
+            
+            let coord = GoogleMapsManager.at_coords[index]
+            marker.position = coord
+            
+            marker.isDraggable = false
+            marker.snippet = nil
+            marker.icon = getStepMark()
+            
+            marker.groundAnchor = CGPoint(x: 0.5, y: 0.5) // 讓每一個頂點之間的連線是以marker的中心點為連接點
+        
+            marker.map = GoogleMapsManager.at_mapView
+            
+            index += 1
+
+            // 把前一次的動畫移除
+            if let preMark = GoogleMapsManager.at_preStepMark {
+                preMark.map = nil
+            }
+            GoogleMapsManager.at_stepIndex = index
+            GoogleMapsManager.at_preStepMark = marker
+        }
+    }
     
     func removeTrackAnimation() {
         
@@ -475,6 +525,16 @@ extension GoogleMapsManager {
         
 
         markView.addSubview(markSubView)
+        
+        return markView.asImage()
+    }
+    
+    private func getStepMark() -> UIImage {
+        
+        let markView = UIView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
+        markView.backgroundColor = UIColorFromRGB(rgbValue: 0x00FF00, alpha: 0.5)
+        markView.layer.cornerRadius = markView.frame.size.width / 2
+        markView.clipsToBounds = true
         
         return markView.asImage()
     }

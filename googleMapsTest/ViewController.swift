@@ -368,7 +368,14 @@ extension ViewController: CLLocationManagerDelegate {
             self.present(alertController, animated: true, completion: nil)
         
         case .authorizedWhenInUse:
-            myLocationMgr.startUpdatingLocation() // 將畫面移動到目前使用者的位置
+//            myLocationMgr.startUpdatingLocation() // 將畫面移動到目前使用者的位置
+            
+            // 模擬器測試用: 初始位置顯示公司
+            let location = CLLocationCoordinate2D(latitude: 24.164292, longitude: 120.6616822)
+            let camera = GMSCameraPosition.camera(withTarget: location, zoom: 15)
+            mapView.camera = camera
+
+            
             mapView.isMyLocationEnabled = true  // 開啟我的位置(小藍點)
             mapView.settings.myLocationButton = true // 開啟定位按鈕(右下角的圓點)
             
